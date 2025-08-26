@@ -469,6 +469,35 @@
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
         }
+        
+        /* Стили для красивого чекбокса */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 8px 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+            transform: scale(1.2);
+            accent-color: #667eea;
+        }
+        
+        .checkbox-container label {
+            margin: 0;
+            cursor: pointer;
+            color: #555;
+            font-weight: 500;
+            user-select: none;
+        }
+        
+        .checkbox-container:hover label {
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -486,10 +515,10 @@
                     <label>Пароль</label>
                     <input type="password" id="loginPassword" required>
                     </div>
-                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <div class="checkbox-container">
                     <input type="checkbox" id="rememberMe">
-                    <label for="rememberMe" style="margin: 0; cursor: pointer;">Запомнить меня</label>
-                    </div>
+                    <label for="rememberMe">Запомнить меня</label>
+                </div>
                 <button type="submit" class="btn">Войти</button>
                 <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #666;">
                     Нет аккаунта? <a href="#" onclick="showRegistration()" style="color: #667eea; text-decoration: none;">Зарегистрироваться</a>
