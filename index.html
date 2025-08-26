@@ -638,6 +638,7 @@
                     <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
                     <button class="btn btn-secondary" onclick="refreshAdminData()" style="margin-top: 10px;">🔄 Обновить данные</button>
                     <button class="btn btn-secondary" onclick="createTestData()" style="margin-top: 10px;">🧪 Создать тестовые данные</button>
+                    <button class="btn btn-secondary" onclick="diagnoseData()" style="margin-top: 10px;">🔍 Диагностика данных</button>
                     <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 10px;">Очистить все данные (отладка)</button>
                     <button class="btn btn-danger" onclick="cleanCorruptedData()" style="margin-top: 10px;">Очистить некорректные данные</button>
                 </div>
@@ -1060,6 +1061,13 @@
                     return;
                 }
                 
+                // Check if user exists
+                const user = users.find(u => u.id === challenge.userId);
+                if (!user) {
+                    console.warn('User not found for challenge:', challenge);
+                    // Still delete the challenge and weight records even if user is missing
+                }
+                
                 try {
                     // Remove challenge
                     challenges = challenges.filter(c => c.id !== challengeId);
@@ -1071,8 +1079,7 @@
                     console.log('Weight records after deletion:', weightRecords);
                     saveWeightRecords();
                     
-                    // Remove user (if not admin)
-                    const user = users.find(u => u.id === challenge.userId);
+                    // Remove user (if not admin and exists)
                     if (user && !user.isAdmin) {
                         users = users.filter(u => u.id !== challenge.userId);
                         console.log('Users after deletion:', users);
@@ -1169,10 +1176,10 @@
         }
 
         function cleanCorruptedData() {
-            if (confirm('Очистить некорректные данные? Это удалит записи с undefined значениями.')) {
+            if (confirm('Очистить некорректные данные? Это удалит записи с undefined значениями и orphaned challenges.')) {
                 let cleanedCount = 0;
                 
-                // Clean challenges with undefined values
+                // Clean challenges with undefined values or missing users
                 const originalChallengesLength = challenges.length;
                 challenges = challenges.filter(challenge => {
                     if (!challenge.initialWeight || 
@@ -1180,13 +1187,23 @@
                         challenge.initialWeight === 'Не указан' ||
                         !challenge.startDate ||
                         !challenge.userId) {
+                        console.log('Removing invalid challenge:', challenge);
                         cleanedCount++;
                         return false;
                     }
+                    
+                    // Check if user exists
+                    const user = users.find(u => u.id === challenge.userId);
+                    if (!user) {
+                        console.log('Removing orphaned challenge (user not found):', challenge);
+                        cleanedCount++;
+                        return false;
+                    }
+                    
                     return true;
                 });
                 
-                // Clean weight records with undefined values
+                // Clean weight records with undefined values or missing users
                 const originalWeightRecordsLength = weightRecords.length;
                 weightRecords = weightRecords.filter(record => {
                     if (!record.weight || 
@@ -1194,9 +1211,19 @@
                         record.weight === 'Не указан' ||
                         !record.date ||
                         !record.userId) {
+                        console.log('Removing invalid weight record:', record);
                         cleanedCount++;
                         return false;
                     }
+                    
+                    // Check if user exists
+                    const user = users.find(u => u.id === record.userId);
+                    if (!user) {
+                        console.log('Removing orphaned weight record (user not found):', record);
+                        cleanedCount++;
+                        return false;
+                    }
+                    
                     return true;
                 });
                 
@@ -1209,6 +1236,7 @@
                         !user.email ||
                         user.email === 'undefined') {
                         if (!user.isAdmin) {
+                            console.log('Removing invalid user:', user);
                             cleanedCount++;
                             return false;
                         }
@@ -1317,8 +1345,8 @@
                 weightRecords.push(...testWeightRecords);
                 
                 // Save to localStorage
-                saveUsers();
                 saveChallenges();
+                saveUsers();
                 saveWeightRecords();
                 
                 // Refresh admin dashboard
@@ -1326,6 +1354,52 @@
                 
                 alert('Тестовые данные созданы! Теперь у вас должно быть 2 участника и 2 челленджа.');
             }
+        }
+
+        function diagnoseData() {
+            console.log('=== DATA DIAGNOSIS ===');
+            
+            let diagnosis = '=== ДИАГНОСТИКА ДАННЫХ ===\n\n';
+            
+            // Check users
+            diagnosis += `ПОЛЬЗОВАТЕЛИ (${users.length}):\n`;
+            users.forEach((user, index) => {
+                diagnosis += `${index + 1}. ID: ${user.id}, Username: ${user.username}, Email: ${user.email}, Admin: ${user.isAdmin}\n`;
+            });
+            
+            // Check challenges
+            diagnosis += `\nЧЕЛЛЕНДЖИ (${challenges.length}):\n`;
+            challenges.forEach((challenge, index) => {
+                const user = users.find(u => u.id === challenge.userId);
+                const userExists = user ? '✅' : '❌';
+                diagnosis += `${index + 1}. ID: ${challenge.id}, UserID: ${challenge.userId} ${userExists}, StartDate: ${challenge.startDate}, InitialWeight: ${challenge.initialWeight}, Paid: ${challenge.paid}\n`;
+            });
+            
+            // Check weight records
+            diagnosis += `\nЗАПИСИ ВЕСА (${weightRecords.length}):\n`;
+            weightRecords.forEach((record, index) => {
+                const user = users.find(u => u.id === record.userId);
+                const userExists = user ? '✅' : '❌';
+                diagnosis += `${index + 1}. ID: ${record.id}, UserID: ${record.userId} ${userExists}, Date: ${record.date}, Weight: ${record.weight}\n`;
+            });
+            
+            // Check for orphaned data
+            const orphanedChallenges = challenges.filter(c => !users.find(u => u.id === c.userId));
+            const orphanedWeightRecords = weightRecords.filter(r => !users.find(u => u.id === r.userId));
+            
+            diagnosis += `\nПРОБЛЕМЫ:\n`;
+            if (orphanedChallenges.length > 0) {
+                diagnosis += `❌ ${orphanedChallenges.length} челленджей без пользователей\n`;
+            }
+            if (orphanedWeightRecords.length > 0) {
+                diagnosis += `❌ ${orphanedWeightRecords.length} записей веса без пользователей\n`;
+            }
+            if (orphanedChallenges.length === 0 && orphanedWeightRecords.length === 0) {
+                diagnosis += `✅ Проблем не обнаружено\n`;
+            }
+            
+            console.log(diagnosis);
+            alert(diagnosis);
         }
 
         function addWeightRecord() {
