@@ -2475,6 +2475,10 @@
         }
         
         function showChallengeRequestForm() {
+            console.log('=== DEBUG: showChallengeRequestForm ===');
+            console.log('challengeConfigs:', challengeConfigs);
+            console.log('challengeConfigs.length:', challengeConfigs.length);
+            
             if (challengeConfigs.length === 0) {
                 alert('Сейчас нет доступных челленджей для участия!');
                 return;
