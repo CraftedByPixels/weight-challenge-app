@@ -389,6 +389,7 @@
                     <button class="nav-btn" id="btnDashboard">Главная</button>
                     <button class="nav-btn" id="btnProfile">Профиль</button>
                     <button class="nav-btn" id="btnProgress">Прогресс</button>
+                    <button class="nav-btn" id="btnAdmin" style="display:none;">Админ панель</button>
                     <button class="nav-btn" id="btnLogout">Выйти</button>
                 </div>
             </div>
@@ -488,9 +489,11 @@
             
             if (currentUser.isAdmin) {
                 document.getElementById('dashboardTitle').textContent = 'Админ панель';
+                document.getElementById('btnAdmin').style.display = 'block';
                 showAdminDashboard();
             } else {
                 document.getElementById('dashboardTitle').textContent = `Добро пожаловать, ${currentUser.username}!`;
+                document.getElementById('btnAdmin').style.display = 'none';
                 showUserDashboard();
             }
         }
@@ -1023,25 +1026,53 @@
             document.getElementById('modal').style.display = 'none';
         }
 
-        // Navigation
+                // Navigation
         document.getElementById('btnDashboard').addEventListener('click', function() {
+            if (currentUser.isAdmin) {
+                showAdminDashboard();
+            } else {
                 showUserDashboard();
+            }
         });
 
         document.getElementById('btnProfile').addEventListener('click', function() {
-            const content = `
-                <div class="stat-card" style="max-width: 500px;">
-                    <h3>Профиль пользователя</h3>
-                    <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
-                    <p><strong>Email:</strong> ${currentUser.email}</p>
-                    <p><strong>Статус:</strong> ${currentUser.isAdmin ? 'Администратор' : 'Участник'}</p>
-                </div>
-            `;
-            document.getElementById('dashboardContent').innerHTML = content;
+            if (currentUser.isAdmin) {
+                const content = `
+                    <div class="stat-card" style="max-width: 500px;">
+                        <h3>Профиль администратора</h3>
+                        <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
+                        <p><strong>Email:</strong> ${currentUser.email}</p>
+                        <p><strong>Статус:</strong> Администратор</p>
+                        <p><strong>Права:</strong> Полный доступ к управлению</p>
+                        <div style="margin-top: 20px;">
+                            <button class="btn" onclick="showAdminDashboard()">Вернуться в админ панель</button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('dashboardContent').innerHTML = content;
+            } else {
+                const content = `
+                    <div class="stat-card" style="max-width: 500px;">
+                        <h3>Профиль пользователя</h3>
+                        <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
+                        <p><strong>Email:</strong> ${currentUser.email}</p>
+                        <p><strong>Статус:</strong> Участник</p>
+                    </div>
+                `;
+                document.getElementById('dashboardContent').innerHTML = content;
+            }
         });
 
         document.getElementById('btnProgress').addEventListener('click', function() {
+            if (currentUser.isAdmin) {
+                showAdminDashboard();
+            } else {
                 showUserDashboard();
+            }
+        });
+
+        document.getElementById('btnAdmin').addEventListener('click', function() {
+            showAdminDashboard();
         });
 
         document.getElementById('btnLogout').addEventListener('click', function() {
