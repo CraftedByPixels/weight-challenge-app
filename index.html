@@ -372,10 +372,14 @@
                     <label>Email</label>
                     <input type="email" id="email" required>
                 </div>
-                <div class="form-group">
+                                <div class="form-group">
                     <label>Пароль</label>
-                        <input type="password" id="password" required>
-                    </div>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe" style="margin: 0; cursor: pointer;">Запомнить меня</label>
+                </div>
                 <button type="submit" class="btn">Войти / Зарегистрироваться</button>
                 </form>
         </div>
@@ -413,13 +417,13 @@
         let challenges = [];
         let weightRecords = [];
 
-        // Initialize data from localStorage
+                // Initialize data from localStorage
         function initializeData() {
             users = JSON.parse(localStorage.getItem('users')) || [];
             challenges = JSON.parse(localStorage.getItem('challenges')) || [];
             weightRecords = JSON.parse(localStorage.getItem('weightRecords')) || [];
             
-                // Create admin user if not exists
+            // Create admin user if not exists
             if (users.length === 0) {
                 const adminUser = {
                     id: 'admin',
@@ -430,6 +434,62 @@
                 users.push(adminUser);
                 saveUsers();
             }
+            
+            // Check for saved login data
+            checkSavedLogin();
+        }
+
+        // Check for saved login data
+        function checkSavedLogin() {
+            const savedLogin = localStorage.getItem('savedLogin');
+            if (savedLogin) {
+                try {
+                    const loginData = JSON.parse(savedLogin);
+                    const user = users.find(u => u.email === loginData.email);
+                    
+                    if (user) {
+                        // Auto-login
+                        currentUser = user;
+                        showDashboard();
+                        
+                        // Show welcome message
+                        setTimeout(() => {
+                            const content = document.getElementById('dashboardContent');
+                            if (content) {
+                                content.innerHTML = '<div class="success-message">Добро пожаловать обратно, ' + user.username + '!</div>' + content.innerHTML;
+                            }
+                        }, 100);
+                    } else {
+                        // Fill form with saved data
+                        fillFormWithSavedData(loginData);
+                    }
+                } catch (error) {
+                    console.error('Error parsing saved login:', error);
+                    localStorage.removeItem('savedLogin');
+                }
+            }
+        }
+
+        // Fill form with saved data
+        function fillFormWithSavedData(loginData) {
+            document.getElementById('username').value = loginData.username || '';
+            document.getElementById('email').value = loginData.email || '';
+            document.getElementById('rememberMe').checked = true;
+        }
+
+        // Save login data
+        function saveLoginData(username, email, rememberMe) {
+            if (rememberMe) {
+                const loginData = { username, email };
+                localStorage.setItem('savedLogin', JSON.stringify(loginData));
+            } else {
+                localStorage.removeItem('savedLogin');
+            }
+        }
+
+        // Clear saved login data
+        function clearSavedLogin() {
+            localStorage.removeItem('savedLogin');
         }
 
         // Save data to localStorage
@@ -1046,6 +1106,7 @@
                         <p><strong>Права:</strong> Полный доступ к управлению</p>
                         <div style="margin-top: 20px;">
                             <button class="btn" onclick="showAdminDashboard()">Вернуться в админ панель</button>
+                            <button class="btn btn-secondary" onclick="clearSavedLogin()" style="margin-top: 10px;">Забыть данные входа</button>
                         </div>
                     </div>
                 `;
@@ -1075,11 +1136,14 @@
             showAdminDashboard();
         });
 
-        document.getElementById('btnLogout').addEventListener('click', function() {
-                currentUser = null;
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('authSection').style.display = 'flex';
-                document.getElementById('authForm').reset();
+                document.getElementById('btnLogout').addEventListener('click', function() {
+            currentUser = null;
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('authForm').reset();
+            
+            // Clear saved login data on logout
+            clearSavedLogin();
         });
 
         // Auth form submission
@@ -1089,6 +1153,7 @@
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
             
             if (!username || !email || !password) {
                 alert('Пожалуйста, заполните все поля');
@@ -1096,6 +1161,10 @@
             }
             
             const user = authenticateUser(username, email, password);
+            
+            // Save login data if "Remember me" is checked
+            saveLoginData(username, email, rememberMe);
+            
             showDashboard();
         });
 
