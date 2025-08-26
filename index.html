@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weight Challenge - Челлендж по снижению веса</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <style>
@@ -304,13 +307,15 @@
             background: white;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
+            overflow-x: auto;
             margin-top: 20px;
         }
 
         table {
             width: 100%;
+            min-width: 1200px;
             border-collapse: collapse;
+            white-space: nowrap;
         }
 
         table thead {
@@ -319,8 +324,9 @@
         }
 
         table th, table td {
-            padding: 15px;
+            padding: 10px 8px;
             text-align: left;
+            font-size: 14px;
         }
 
         table tbody tr {
@@ -333,13 +339,13 @@
         }
 
         .btn-small {
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
             cursor: pointer;
             border: none;
             transition: all 0.2s;
-            margin: 0 2px;
+            margin: 0 1px;
         }
 
         .btn-edit {
@@ -356,7 +362,7 @@
             background: #10b981;
             color: white;
         }
-        
+
         .challenges-list {
             margin-top: 20px;
             padding: 15px;
@@ -398,12 +404,70 @@
 
             .dashboard-nav {
                 flex-direction: column;
-                gap: 10px;
+            gap: 10px;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+        }
+        
+        /* Additional styles for new elements */
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .weight-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .weight-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .weight-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .weight-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
         }
     </style>
 </head>
@@ -411,26 +475,71 @@
     <div class="container">
         <!-- Auth Section -->
         <div id="authSection" class="auth-container">
-            <form class="auth-form" id="authForm">
-                <h2>Weight Challenge</h2>
-                    <div class="form-group">
-                    <label>Имя пользователя</label>
-                        <input type="text" id="username" required>
-                    </div>
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm" style="display: block;">
+                <h2>Weight Challenge - Вход</h2>
                     <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="email" required>
-                </div>
-                                <div class="form-group">
+                    <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
                     <label>Пароль</label>
-                    <input type="password" id="password" required>
-                </div>
+                    <input type="password" id="loginPassword" required>
+                    </div>
                 <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" id="rememberMe">
                     <label for="rememberMe" style="margin: 0; cursor: pointer;">Запомнить меня</label>
-                </div>
-                <button type="submit" class="btn">Войти / Зарегистрироваться</button>
+                    </div>
+                <button type="submit" class="btn">Войти</button>
+                <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #666;">
+                    Нет аккаунта? <a href="#" onclick="showRegistration()" style="color: #667eea; text-decoration: none;">Зарегистрироваться</a>
+                </p>
+                <p class="auth-switch" style="text-align: center; margin-top: 10px; color: #666;">
+                    <a href="#" onclick="showAdminLogin()" style="color: #ef4444; text-decoration: none;">🔐 Вход для администратора</a>
+                </p>
                 </form>
+
+            <!-- Registration Form -->
+            <form class="auth-form" id="registrationForm" style="display: none;">
+                <h2>Weight Challenge - Регистрация</h2>
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="regUsername" required>
+            </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите пароль</label>
+                    <input type="password" id="regPasswordConfirm" required>
+                </div>
+                <button type="submit" class="btn">Зарегистрироваться</button>
+                <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #666;">
+                    Уже есть аккаунт? <a href="#" onclick="showLogin()" style="color: #667eea; text-decoration: none;">Войти</a>
+                </p>
+            </form>
+
+            <!-- Admin Login Form -->
+            <form class="auth-form" id="adminLoginForm" style="display: none;">
+                <h2>Weight Challenge - Вход для администратора</h2>
+                <div class="form-group">
+                    <label>Email администратора</label>
+                    <input type="email" id="adminEmail" value="randeako@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль администратора</label>
+                    <input type="password" id="adminPassword" placeholder="admin123" required>
+                </div>
+                <button type="submit" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">Войти как администратор</button>
+                <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #666;">
+                    <a href="#" onclick="showLogin()" style="color: #667eea; text-decoration: none;">← Вернуться к обычному входу</a>
+                </p>
+            </form>
         </div>
 
         <!-- Dashboard Section -->
@@ -460,21 +569,29 @@
     </div>
 
     <script>
+        // Utility functions
+        function generateId() {
+            return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        }
+        
         // Data storage using localStorage
         let currentUser = null;
         let users = [];
         let challenges = [];
         let weightRecords = [];
         let challengeConfigs = []; // New: challenge configurations
+        let registrationRequests = []; // New: registration requests for challenges
 
-                // Initialize data from localStorage
+                        // Initialize data from localStorage
         function initializeData() {
+            console.log('=== INITIALIZING DATA v2.0 ===');
             users = JSON.parse(localStorage.getItem('users')) || [];
             challenges = JSON.parse(localStorage.getItem('challenges')) || [];
             weightRecords = JSON.parse(localStorage.getItem('weightRecords')) || [];
             challengeConfigs = JSON.parse(localStorage.getItem('challengeConfigs')) || [];
+            registrationRequests = JSON.parse(localStorage.getItem('registrationRequests')) || [];
             
-            // Create admin user if not exists
+                // Create admin user if not exists
             if (users.length === 0) {
                 const adminUser = {
                     id: 'admin',
@@ -488,6 +605,128 @@
             
             // Check for saved login data
             checkSavedLogin();
+        }
+    
+    // Functions to switch between login and registration forms
+    function showRegistration() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registrationForm').style.display = 'block';
+        document.getElementById('adminLoginForm').style.display = 'none';
+    }
+    
+    function showLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registrationForm').style.display = 'none';
+        document.getElementById('adminLoginForm').style.display = 'none';
+    }
+    
+    function showAdminLogin() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registrationForm').style.display = 'none';
+        document.getElementById('adminLoginForm').style.display = 'block';
+    }
+    
+    // Handle user registration
+    function handleRegistration(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+        
+        // Validation
+        if (password !== passwordConfirm) {
+            alert('Пароли не совпадают!');
+            return;
+        }
+        
+        if (password.length < 6) {
+            alert('Пароль должен быть не менее 6 символов!');
+            return;
+        }
+        
+        // Check if user already exists
+        if (users.find(u => u.email === email)) {
+            alert('Пользователь с таким email уже существует!');
+            return;
+        }
+        
+        // Create new user
+        const newUser = {
+            id: generateId(),
+            username: username,
+            email: email,
+            password: password, // In real app, this should be hashed
+            isAdmin: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        saveUsers();
+        
+        alert('Регистрация успешна! Теперь вы можете войти в систему.');
+        showLogin();
+        
+        // Clear form
+        document.getElementById('registrationForm').reset();
+    }
+    
+            // Handle user login
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Find user
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                
+                if (rememberMe) {
+                    saveLoginData();
+                } else {
+                    clearSavedLogin();
+                }
+                
+                showDashboard();
+            } else {
+                alert('Неверный email или пароль!');
+            }
+        }
+        
+        // Handle admin login
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            // Check admin credentials
+            if (email === 'randeako@gmail.com' && password === 'admin123') {
+                // Find or create admin user
+                let adminUser = users.find(u => u.isAdmin);
+                if (!adminUser) {
+                    adminUser = {
+                        id: 'admin',
+                        username: 'admin',
+                        email: 'randeako@gmail.com',
+                        password: 'admin123',
+                        isAdmin: true,
+                        createdAt: new Date().toISOString()
+                    };
+                    users.push(adminUser);
+                    saveUsers();
+                }
+                
+                currentUser = adminUser;
+                showDashboard();
+            } else {
+                alert('Неверные данные администратора!');
+            }
         }
 
         // Check for saved login data
@@ -514,7 +753,7 @@
                         // Fill form with saved data
                         fillFormWithSavedData(loginData);
                     }
-                } catch (error) {
+            } catch (error) {
                     console.error('Error parsing saved login:', error);
                     localStorage.removeItem('savedLogin');
                 }
@@ -523,17 +762,17 @@
 
         // Fill form with saved data
         function fillFormWithSavedData(loginData) {
-            document.getElementById('username').value = loginData.username || '';
-            document.getElementById('email').value = loginData.email || '';
+            document.getElementById('loginEmail').value = loginData.email || '';
             document.getElementById('rememberMe').checked = true;
         }
 
         // Save login data
-        function saveLoginData(username, email, rememberMe) {
+        function saveLoginData() {
+            const rememberMe = document.getElementById('rememberMe').checked;
             if (rememberMe) {
-                const loginData = { username, email };
+                const loginData = { email: currentUser.email };
                 localStorage.setItem('savedLogin', JSON.stringify(loginData));
-            } else {
+                } else {
                 localStorage.removeItem('savedLogin');
             }
         }
@@ -559,46 +798,14 @@
         function saveChallengeConfigs() {
             localStorage.setItem('challengeConfigs', JSON.stringify(challengeConfigs));
         }
-
-        // Auth functions
-        function authenticateUser(username, email, password) {
-            // Check for admin login
-            if (username === 'admin' && email === 'randeako@gmail.com' && password === 'admin123') {
-                let adminUser = users.find(u => u.isAdmin);
-                if (!adminUser) {
-                    adminUser = {
-                        id: 'admin',
-                        username: 'admin',
-                        email: 'randeako@gmail.com',
-                        isAdmin: true
-                    };
-                    users.push(adminUser);
-                    saveUsers();
-                }
-                currentUser = adminUser;
-                return adminUser;
-            }
-            
-            // Regular user authentication
-            let user = users.find(u => u.email === email);
-            
-            if (!user) {
-                // Create new user
-                user = {
-                    id: Date.now().toString(),
-                    username: username,
-                    email: email,
-                        isAdmin: false
-                    };
-                users.push(user);
-                saveUsers();
-            }
-            
-            currentUser = user;
-            return user;
+        
+        function saveRegistrationRequests() {
+            localStorage.setItem('registrationRequests', JSON.stringify(registrationRequests));
         }
 
-                function showDashboard() {
+        // Auth functions - removed old authenticateUser function
+
+        function showDashboard() {
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             
@@ -634,7 +841,7 @@
                     <div class="stat-card">
                         <h3>Активных челленджей</h3>
                         <div class="value">${challenges.length}</div>
-                    </div>
+                        </div>
                     <div class="stat-card">
                         <h3>Призовой фонд</h3>
                         <div class="value">${challenges.reduce((total, c) => total + (c.contribution || 0), 0)} ₽</div>
@@ -642,16 +849,20 @@
                     <div class="stat-card">
                         <h3>Общий прогресс</h3>
                         <div class="value">${getAverageProgress()}%</div>
-                    </div>
-                </div>
+                            </div>
+                        </div>
                 
                 <div class="chart-container">
                     <h3>Прогресс всех участников</h3>
                     <canvas id="adminProgressChart"></canvas>
-                </div>
+                    </div>
                 
                 <div class="table-container" style="margin-top: 20px;">
-                    <h3>Участники челленджа (${challenges.length} челленджей)</h3>
+                    <h3>Участники челленджа (${challenges.length} участников)</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                        🏆 Активных челленджей: ${challengeConfigs.length} | 
+                        💡 Используйте горизонтальную прокрутку для просмотра всех колонок
+                    </p>
                     <table>
                         <thead>
                             <tr>
@@ -659,6 +870,8 @@
                                 <th>Пользователь</th>
                                 <th>Email</th>
                                 <th>Дата начала</th>
+                                <th>Длительность</th>
+                                <th>Осталось дней</th>
                                 <th>Начальный вес</th>
                                 <th>Текущий вес</th>
                                 <th>Прогресс (%)</th>
@@ -670,10 +883,11 @@
                             ${generateParticipantsTable()}
                         </tbody>
                     </table>
-                </div>
+                    </div>
                 
                 <div style="margin-top: 20px;">
                     <button class="btn" onclick="manageChallenges()">🏆 Управление челленджами</button>
+                    <button class="btn" onclick="manageRegistrationRequests()">📝 Заявки на участие (${registrationRequests.filter(r => r.status === 'pending').length})</button>
                     <button class="btn" onclick="addNewParticipant()">Добавить участника</button>
                     <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
                     <button class="btn btn-secondary" onclick="refreshAdminData()" style="margin-top: 10px;">🔄 Обновить данные</button>
@@ -681,8 +895,8 @@
                     <button class="btn btn-secondary" onclick="diagnoseData()" style="margin-top: 10px;">🔍 Диагностика данных</button>
                     <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 10px;">Очистить все данные (отладка)</button>
                     <button class="btn btn-danger" onclick="cleanCorruptedData()" style="margin-top: 10px;">Очистить некорректные данные</button>
-                </div>
-            `;
+                    </div>
+                `;
             
             document.getElementById('dashboardContent').innerHTML = content;
             
@@ -693,32 +907,117 @@
             const userChallenges = challenges.filter(c => c.userId === currentUser.id);
             const userWeightRecords = weightRecords.filter(w => w.userId === currentUser.id);
             
-            let content = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Активные челленджи</h3>
-                        <div class="value">${userChallenges.length}</div>
+            let content = '';
+            
+            if (userChallenges.length === 0) {
+                content = `
+                    <div class="no-challenge" style="text-align: center; padding: 40px;">
+                        <h2>У вас нет активного челленджа</h2>
+                        <p style="color: #666; margin-bottom: 20px;">Подайте заявку на участие в челлендже</p>
+                        <button class="btn btn-primary" onclick="showChallengeRequestForm()">Подать заявку на участие</button>
                     </div>
-                    <div class="stat-card">
-                        <h3>Записи веса</h3>
-                        <div class="value">${userWeightRecords.length}</div>
+                `;
+            } else {
+                const challenge = userChallenges[0]; // Берем первый челлендж
+                const config = challengeConfigs.find(c => c.id === challenge.configId);
+                const startDate = new Date(challenge.startDate);
+                const today = new Date();
+                const daysElapsed = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                const daysRemaining = Math.max(0, (config ? config.duration : 14) - daysElapsed);
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + (config ? config.duration : 14));
+                
+                const currentWeight = userWeightRecords.length > 0 ? userWeightRecords[userWeightRecords.length - 1].weight : challenge.initialWeight;
+                const totalLoss = challenge.initialWeight - currentWeight;
+                const progressPercent = ((totalLoss / challenge.initialWeight) * 100).toFixed(1);
+                
+                content = `
+                    <div class="challenge-info" style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px;">
+                        <h2 style="color: #667eea; margin-top: 0;">🏆 Информация о челлендже</h2>
+                        
+                        <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                            <div class="info-card" style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
+                                <h4 style="margin: 0 0 10px 0; color: #495057;">📅 Даты челленджа</h4>
+                                <p style="margin: 5px 0;"><strong>Начало:</strong> ${startDate.toLocaleDateString('ru-RU')}</p>
+                                <p style="margin: 5px 0;"><strong>Окончание:</strong> ${endDate.toLocaleDateString('ru-RU')}</p>
+                                <p style="margin: 5px 0;"><strong>Длительность:</strong> ${config ? config.duration : 14} дней</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Текущий вес</h3>
-                        <div class="value">${userWeightRecords.length > 0 ? userWeightRecords[userWeightRecords.length - 1].weight + ' кг' : 'Не указан'}</div>
+                            
+                            <div class="info-card" style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #10b981;">
+                                <h4 style="margin: 0 0 10px 0; color: #495057;">⏱️ Прогресс времени</h4>
+                                <p style="margin: 5px 0;"><strong>Прошло дней:</strong> ${daysElapsed}</p>
+                                <p style="margin: 5px 0;"><strong>Осталось дней:</strong> ${daysRemaining}</p>
+                                <p style="margin: 5px 0;"><strong>Статус:</strong> ${daysRemaining > 0 ? '🟢 Активен' : '🔴 Завершен'}</p>
+                    </div>
+                            
+                            <div class="info-card" style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                                <h4 style="margin: 0 0 10px 0; color: #495057;">⚖️ Результаты</h4>
+                                <p style="margin: 5px 0;"><strong>Начальный вес:</strong> ${challenge.initialWeight} кг</p>
+                                <p style="margin: 5px 0;"><strong>Текущий вес:</strong> ${currentWeight} кг</p>
+                                <p style="margin: 5px 0;"><strong>Потеряно:</strong> ${totalLoss.toFixed(1)} кг (${progressPercent}%)</p>
                     </div>
                 </div>
                 
-                <div class="chart-container">
-                    <h3>Ваш прогресс</h3>
-                    <canvas id="progressChart"></canvas>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <button class="btn" onclick="addWeightRecord()">Добавить запись веса</button>
-                    <button class="btn btn-secondary" onclick="joinChallenge()">Присоединиться к челленджу</button>
+                        <div class="weight-history" style="margin-top: 25px;">
+                            <h4 style="color: #495057; margin-bottom: 15px;">📊 История измерений веса</h4>
+                            ${userWeightRecords.length > 0 ? `
+                                <div class="weight-table" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead style="background: #667eea; color: white;">
+                                            <tr>
+                                                <th style="padding: 12px; text-align: left;">Дата</th>
+                                                <th style="padding: 12px; text-align: left;">Вес (кг)</th>
+                                                <th style="padding: 12px; text-align: left;">Изменение</th>
+                                                <th style="padding: 12px; text-align: left;">Прогресс</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                            ${userWeightRecords.sort((a, b) => new Date(b.date) - new Date(a.date)).map((record, index) => {
+                                                const prevWeight = index < userWeightRecords.length - 1 ? userWeightRecords[index + 1].weight : challenge.initialWeight;
+                                                const change = record.weight - prevWeight;
+                                                const changeText = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+                                                const changeColor = change > 0 ? '#ef4444' : '#10b981';
+                                                const progress = ((challenge.initialWeight - record.weight) / challenge.initialWeight * 100).toFixed(1);
+                                                return `
+                                                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                                                        <td style="padding: 12px;">${new Date(record.date).toLocaleDateString('ru-RU')}</td>
+                                                        <td style="padding: 12px; font-weight: bold;">${record.weight} кг</td>
+                                                        <td style="padding: 12px; color: ${changeColor};">${changeText} кг</td>
+                                                        <td style="padding: 12px; color: #667eea;">${progress}%</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : `
+                                <p style="color: #666; text-align: center; padding: 20px;">Пока нет записей веса</p>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Ваш прогресс относительно других участников</h3>
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                    
+                    <div class="add-weight-section" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                        <h3>Добавить новый вес</h3>
+                        <div class="weight-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <label for="newWeight">Новый вес (кг):</label>
+                            <input type="number" id="newWeight" step="0.1" min="30" max="200" placeholder="Введите вес" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button onclick="addNewWeight()" class="btn btn-primary">Добавить вес</button>
+                            </div>
+                        <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                            💡 Вы можете вводить вес в любой момент челленджа. Кто-то каждый день, кто-то 2-3 раза за весь период.
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="addWeightRecord()">Добавить запись веса с датой</button>
                 </div>
             `;
+            }
             
             document.getElementById('dashboardContent').innerHTML = content;
             
@@ -731,19 +1030,80 @@
             const ctx = document.getElementById('progressChart');
             if (!ctx) return;
             
-            const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Create anonymous chart showing all participants' progress
+            const datasets = [];
+            let colorIndex = 0;
+            const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6']; // Bright colors for better visibility
+            
+            // Add current user's data (highlighted)
+            if (records.length > 0) {
+                const challenge = challenges.find(c => c.userId === currentUser.id);
+                if (challenge) {
+                    const startDate = new Date(challenge.startDate);
+                    const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    datasets.push({
+                        label: 'Ваш прогресс',
+                        data: sortedRecords.map(r => {
+                            const daysDiff = Math.max(0, Math.floor((new Date(r.date) - startDate) / (1000 * 60 * 60 * 24)));
+                            const progress = Math.max(0, ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100);
+                            return { x: daysDiff, y: progress };
+                        }),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    });
+                }
+            }
+            
+            // Add other participants' data (anonymous)
+            challenges.forEach((challenge, index) => {
+                if (challenge.userId !== currentUser.id) {
+                    const records = weightRecords.filter(r => r.userId === challenge.userId);
+                    if (records.length > 0) {
+                        const startDate = new Date(challenge.startDate);
+                        const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        
+                        datasets.push({
+                            label: `Участник ${index + 1}`,
+                            data: sortedRecords.map(r => {
+                                const daysDiff = Math.max(0, Math.floor((new Date(r.date) - startDate) / (1000 * 60 * 60 * 24)));
+                                const progress = Math.max(0, ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100);
+                                return { x: daysDiff, y: progress };
+                            }),
+                            borderColor: colors[colorIndex % colors.length],
+                            backgroundColor: colors[colorIndex % colors.length] + '30',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        });
+                        colorIndex++;
+                    }
+                }
+            });
+            
+            // Get all unique days for X-axis
+            const allDays = new Set();
+            challenges.forEach(challenge => {
+                const records = weightRecords.filter(r => r.userId === challenge.userId);
+                if (records.length > 0) {
+                    const startDate = new Date(challenge.startDate);
+                    records.forEach(r => {
+                        const daysDiff = Math.max(0, Math.floor((new Date(r.date) - startDate) / (1000 * 60 * 60 * 24)));
+                        allDays.add(daysDiff);
+                    });
+                }
+            });
+            const sortedDays = Array.from(allDays).sort((a, b) => a - b);
             
             new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: sortedRecords.map(r => new Date(r.date).toLocaleDateString('ru-RU')),
-                    datasets: [{
-                        label: 'Вес (кг)',
-                        data: sortedRecords.map(r => r.weight),
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4
-                    }]
+                data: { 
+                    datasets 
                 },
                 options: {
                     responsive: true,
@@ -753,15 +1113,40 @@
                         },
                         title: {
                             display: true,
-                            text: 'Прогресс снижения веса'
+                            text: 'Ваш прогресс относительно других участников'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: false,
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
                             title: {
                                 display: true,
-                                text: 'Вес (кг)'
+                                text: 'Дни челленджа'
+                            },
+                            min: 0,
+                            max: function() {
+                                // Get challenge duration from config
+                                const userChallenge = challenges.find(c => c.userId === currentUser.id);
+                                if (userChallenge && userChallenge.configId) {
+                                    const config = challengeConfigs.find(c => c.id === userChallenge.configId);
+                                    return config ? config.duration : Math.max(...sortedDays);
+                                }
+                                return Math.max(...sortedDays);
+                            }()
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Потеря веса (%)'
                             }
                         }
                     }
@@ -780,23 +1165,57 @@
             challenges.forEach((challenge, index) => {
                 const records = weightRecords.filter(r => r.userId === challenge.userId);
                 if (records.length > 0) {
-                    const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(a.date));
+                    const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
                     const user = users.find(u => u.id === challenge.userId);
+                    
+                    // Calculate days from start (ensure non-negative)
+                    const startDate = new Date(challenge.startDate);
+                    const labels = sortedRecords.map(r => {
+                        const recordDate = new Date(r.date);
+                        const daysDiff = Math.max(0, Math.floor((recordDate - startDate) / (1000 * 60 * 60 * 24)));
+                        return `День ${daysDiff}`;
+                    });
                     
                     datasets.push({
                         label: user ? user.username : `Участник ${index + 1}`,
-                        data: sortedRecords.map(r => ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100),
+                        data: sortedRecords.map(r => {
+                            const progress = ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100;
+                            return Math.max(0, progress); // Ensure non-negative progress
+                        }),
                         borderColor: colors[colorIndex % colors.length],
-                        backgroundColor: colors[colorIndex % colors.length] + '20',
-                        tension: 0.4
+                        backgroundColor: colors[colorIndex % colors.length] + '30',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     });
                     colorIndex++;
                 }
             });
             
+            // Get all unique labels for X-axis (ensure non-negative)
+            const allLabels = [];
+            challenges.forEach(challenge => {
+                const records = weightRecords.filter(r => r.userId === challenge.userId);
+                if (records.length > 0) {
+                    const startDate = new Date(challenge.startDate);
+                    records.forEach(r => {
+                        const recordDate = new Date(r.date);
+                        const daysDiff = Math.max(0, Math.floor((recordDate - startDate) / (1000 * 60 * 60 * 24)));
+                        if (!allLabels.includes(daysDiff)) {
+                            allLabels.push(daysDiff);
+                        }
+                    });
+                }
+            });
+            allLabels.sort((a, b) => a - b);
+            
             new Chart(ctx, {
                 type: 'line',
-                data: { datasets },
+                data: { 
+                    labels: allLabels.map(day => `День ${day}`),
+                    datasets 
+                },
                 options: {
                     responsive: true,
                     plugins: {
@@ -806,9 +1225,22 @@
                         title: {
                             display: true,
                             text: 'Прогресс всех участников (% потери веса)'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Дни челленджа'
+                            }
+                        },
                         y: {
                             beginAtZero: true,
                             title: {
@@ -831,7 +1263,7 @@
                 const records = weightRecords.filter(r => r.userId === challenge.userId);
                 if (records.length > 0) {
                     const latestWeight = records[records.length - 1].weight;
-                    const progress = ((challenge.initialWeight - latestWeight) / challenge.initialWeight) * 100;
+                    const progress = Math.max(0, ((challenge.initialWeight - latestWeight) / challenge.initialWeight) * 100);
                     totalProgress += progress;
                     validChallenges++;
                 }
@@ -842,7 +1274,7 @@
 
         function generateParticipantsTable() {
             if (challenges.length === 0) {
-                return '<tr><td colspan="9" style="text-align: center;">Нет активных участников</td></tr>';
+                return '<tr><td colspan="11" style="text-align: center;">Нет активных участников</td></tr>';
             }
             
             let tableRows = '';
@@ -874,13 +1306,23 @@
                 console.log(`Weight records for challenge ${index}:`, records);
                 
                 const currentWeight = records.length > 0 ? records[records.length - 1].weight : challenge.initialWeight;
-                const progress = ((challenge.initialWeight - currentWeight) / challenge.initialWeight) * 100;
+                const progress = Math.max(0, ((challenge.initialWeight - currentWeight) / challenge.initialWeight) * 100);
                 
                 console.log(`Calculated values for challenge ${index}:`, {
                     initialWeight: challenge.initialWeight,
                     currentWeight: currentWeight,
                     progress: progress
                 });
+                
+                // Get challenge config for duration
+                const config = challengeConfigs.find(c => c.id === challenge.configId);
+                const challengeDuration = config ? config.duration : 'Не указано';
+                
+                // Calculate days remaining
+                const startDate = new Date(challenge.startDate);
+                const now = new Date();
+                const daysElapsed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+                const daysRemaining = config ? Math.max(0, config.duration - daysElapsed) : 'Не указано';
                 
                 validChallenges++;
                 tableRows += `
@@ -889,6 +1331,8 @@
                         <td>${user.username}</td>
                         <td>${user.email}</td>
                         <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
+                        <td>${challengeDuration} дней</td>
+                        <td>${typeof daysRemaining === 'number' ? daysRemaining + ' дней' : daysRemaining}</td>
                         <td>${challenge.initialWeight} кг</td>
                         <td>${currentWeight} кг</td>
                         <td>${isNaN(progress) ? '0.0' : progress.toFixed(1)}%</td>
@@ -903,7 +1347,7 @@
             });
             
             if (validChallenges === 0) {
-                return '<tr><td colspan="9" style="text-align: center;">Нет корректных участников</td></tr>';
+                return '<tr><td colspan="11" style="text-align: center;">Нет корректных участников</td></tr>';
             }
             
             return tableRows;
@@ -1001,28 +1445,28 @@
             saveUsers();
             
             // Create challenge
-            const newChallenge = {
+                const newChallenge = {
                 id: Date.now().toString() + 'c',
                 userId: newUser.id,
                 configId: challengeConfigId,
                 startDate: new Date().toISOString().split('T')[0],
-                initialWeight: initialWeight,
+                    initialWeight: initialWeight,
                 contribution: paymentConfirm ? 1000 : 0
-            };
-            challenges.push(newChallenge);
+                };
+                challenges.push(newChallenge);
             saveChallenges();
-            
+                
             // Create initial weight record
-            const weightRecord = {
+                const weightRecord = {
                 id: Date.now().toString() + 'w',
                 userId: newUser.id,
                 date: new Date().toISOString().split('T')[0],
-                weight: initialWeight
-            };
-            weightRecords.push(weightRecord);
+                    weight: initialWeight
+                };
+                weightRecords.push(weightRecord);
             saveWeightRecords();
-            
-            closeModal();
+                
+                closeModal();
             showAdminDashboard();
             
             // Show success message
@@ -1107,7 +1551,7 @@
             if (newWeight && !isNaN(newWeight)) {
                 const weightRecord = {
                     id: Date.now().toString(),
-                    userId: userId,
+                userId: userId,
                     date: new Date().toISOString().split('T')[0],
                     weight: newWeight
                 };
@@ -1128,7 +1572,7 @@
             console.log('Attempting to delete challenge:', challengeId);
             
             if (confirm('Вы уверены, что хотите удалить этого участника?')) {
-                const challenge = challenges.find(c => c.id === challengeId);
+            const challenge = challenges.find(c => c.id === challengeId);
                 console.log('Found challenge to delete:', challenge);
                 
                 if (!challenge) {
@@ -1137,7 +1581,7 @@
                 }
                 
                 // Check if user exists
-                const user = users.find(u => u.id === challenge.userId);
+            const user = users.find(u => u.id === challenge.userId);
                 if (!user) {
                     console.warn('User not found for challenge:', challenge);
                     // Still delete the challenge and weight records even if user is missing
@@ -1351,21 +1795,58 @@
         }
 
         function createTestData() {
-            if (confirm('Создать тестовые данные? Это добавит несколько участников для проверки.')) {
-                // Create test users
+            if (confirm('Создать тестовые данные? Это добавит 5 участников в один челлендж на 14 дней.')) {
+                // Create test challenge config first
+                const testConfig = {
+                    id: 'testConfig1',
+                    name: 'Тестовый челлендж',
+                    registrationStart: '2025-01-01',
+                    registrationEnd: '2025-01-31',
+                    duration: 14,
+                    createdAt: new Date().toISOString()
+                };
+                
+                // Create 5 test users
                 const testUsers = [
                     {
                         id: 'test1',
-                        username: 'Тестовый участник 1',
-                        email: 'test1@example.com',
+                        username: 'Анна',
+                        email: 'anna@example.com',
                         isAdmin: false
                     },
                     {
                         id: 'test2',
-                        username: 'Тестовый участник 2',
-                        email: 'test2@example.com',
+                        username: 'Михаил',
+                        email: 'mikhail@example.com',
+                        isAdmin: false
+                    },
+                    {
+                        id: 'test3',
+                        username: 'Елена',
+                        email: 'elena@example.com',
+                        isAdmin: false
+                    },
+                    {
+                        id: 'test4',
+                        username: 'Дмитрий',
+                        email: 'dmitry@example.com',
+                        isAdmin: false
+                    },
+                    {
+                        id: 'test5',
+                        username: 'Ольга',
+                        email: 'olga@example.com',
                         isAdmin: false
                     }
+                ];
+                
+                // Different join dates for each participant
+                const joinDates = [
+                    '2025-01-01', // Анна - в первый день
+                    '2025-01-03', // Михаил - на 3-й день
+                    '2025-01-05', // Елена - на 5-й день
+                    '2025-01-07', // Дмитрий - на 7-й день
+                    '2025-01-09'  // Ольга - на 9-й день
                 ];
                 
                 // Create test challenges
@@ -1373,61 +1854,134 @@
                     {
                         id: 'challenge1',
                         userId: 'test1',
-                        startDate: '2025-01-01',
-                        initialWeight: 80,
-                        paid: true
+                        configId: 'testConfig1',
+                        startDate: joinDates[0],
+                        initialWeight: 75,
+                        contribution: 1000
                     },
                     {
                         id: 'challenge2',
                         userId: 'test2',
-                        startDate: '2025-01-15',
-                        initialWeight: 75,
-                        paid: false
+                        configId: 'testConfig1',
+                        startDate: joinDates[1],
+                        initialWeight: 85,
+                        contribution: 1000
+                    },
+                    {
+                        id: 'challenge3',
+                        userId: 'test3',
+                        configId: 'testConfig1',
+                        startDate: joinDates[2],
+                        initialWeight: 70,
+                        contribution: 1000
+                    },
+                    {
+                        id: 'challenge4',
+                        userId: 'test4',
+                        configId: 'testConfig1',
+                        startDate: joinDates[3],
+                        initialWeight: 90,
+                        contribution: 1000
+                    },
+                    {
+                        id: 'challenge5',
+                        userId: 'test5',
+                        configId: 'testConfig1',
+                        startDate: joinDates[4],
+                        initialWeight: 65,
+                        contribution: 1000
                     }
                 ];
                 
-                // Create test weight records
-                const testWeightRecords = [
-                    {
-                        id: 'weight1',
+                // Create dynamic weight records for 30 days
+                const testWeightRecords = [];
+                
+                // Anna's progress - starts day 1, 14 days
+                for (let day = 0; day < 14; day++) {
+                    const date = new Date(joinDates[0]);
+                    date.setDate(date.getDate() + day);
+                    const weight = 75 - (day * 0.2) - (Math.random() * 0.1);
+                    testWeightRecords.push({
+                        id: `weight1_${day}`,
                         userId: 'test1',
-                        date: '2025-01-01',
-                        weight: 80
-                    },
-                    {
-                        id: 'weight2',
-                        userId: 'test1',
-                        date: '2025-01-15',
-                        weight: 78
-                    },
-                    {
-                        id: 'weight3',
+                        challengeId: 'challenge1',
+                        date: date.toISOString().split('T')[0],
+                        weight: Math.round(weight * 10) / 10
+                    });
+                }
+                
+                // Mikhail's progress - starts day 3, 11 days
+                for (let day = 0; day < 11; day++) {
+                    const date = new Date(joinDates[1]);
+                    date.setDate(date.getDate() + day);
+                    const weight = 85 - (day * 0.25) - (Math.random() * 0.1);
+                    testWeightRecords.push({
+                        id: `weight2_${day}`,
                         userId: 'test2',
-                        date: '2025-01-15',
-                        weight: 75
-                    },
-                    {
-                        id: 'weight4',
-                        userId: 'test2',
-                        date: '2025-01-30',
-                        weight: 73
-                    }
-                ];
+                        challengeId: 'challenge2',
+                        date: date.toISOString().split('T')[0],
+                        weight: Math.round(weight * 10) / 10
+                    });
+                }
+                
+                // Elena's progress - starts day 5, 9 days
+                for (let day = 0; day < 9; day++) {
+                    const date = new Date(joinDates[2]);
+                    date.setDate(date.getDate() + day);
+                    const weight = 70 - (day * 0.15) - (Math.random() * 0.1);
+                    testWeightRecords.push({
+                        id: `weight3_${day}`,
+                        userId: 'test3',
+                        challengeId: 'challenge3',
+                        date: date.toISOString().split('T')[0],
+                        weight: Math.round(weight * 10) / 10
+                    });
+                }
+                
+                // Dmitry's progress - starts day 7, 7 days
+                for (let day = 0; day < 7; day++) {
+                    const date = new Date(joinDates[3]);
+                    date.setDate(date.getDate() + day);
+                    const weight = 90 - (day * 0.3) - (Math.random() * 0.1);
+                    testWeightRecords.push({
+                        id: `weight4_${day}`,
+                        userId: 'test4',
+                        challengeId: 'challenge4',
+                        date: date.toISOString().split('T')[0],
+                        weight: Math.round(weight * 10) / 10
+                    });
+                }
+                
+                // Olga's progress - starts day 9, 5 days
+                for (let day = 0; day < 5; day++) {
+                    const date = new Date(joinDates[4]);
+                    date.setDate(date.getDate() + day);
+                    const weight = 65 - (day * 0.2) - (Math.random() * 0.1);
+                    testWeightRecords.push({
+                        id: `weight5_${day}`,
+                        userId: 'test5',
+                        challengeId: 'challenge5',
+                        date: date.toISOString().split('T')[0],
+                        weight: Math.round(weight * 10) / 10
+                    });
+                }
                 
                 // Add test data
+                challengeConfigs.push(testConfig);
                 users.push(...testUsers);
                 challenges.push(...testChallenges);
                 weightRecords.push(...testWeightRecords);
                 
                 // Save to localStorage
-                saveChallenges();
+                saveChallengeConfigs();
                 saveUsers();
+                saveChallenges();
                 saveWeightRecords();
                 
                 // Refresh admin dashboard
                 showAdminDashboard();
                 
-                alert('Тестовые данные созданы! Теперь у вас должно быть 2 участника и 2 челленджа.');
+                alert(`Тестовые данные созданы!\n\n✅ 1 челлендж (14 дней)\n✅ 5 участников в разных датах вступления\n✅ ${testWeightRecords.length} записей веса\n✅ Динамический прогресс для графика\n\nПризовой фонд: ${testChallenges.length * 1000} ₽`);
             }
         }
 
@@ -1507,10 +2061,10 @@
                 
                 <div class="form-section">
                     <h4>Создать новый челлендж</h4>
-                    <div class="form-group">
+                <div class="form-group">
                         <label>Название челленджа</label>
                         <input type="text" id="challengeName" placeholder="Например: Летний марафон похудения" required>
-                    </div>
+                </div>
                     <div class="form-group">
                         <label>Начало регистрации</label>
                         <input type="date" id="registrationStart" required>
@@ -1574,13 +2128,45 @@
                 createdAt: new Date().toISOString()
             };
             
-            challengeConfigs.push(newConfig);
+                        challengeConfigs.push(newConfig);
             saveChallengeConfigs();
+            
+            // Create test participant automatically
+            const testUser = {
+                id: Date.now().toString() + 'test',
+                username: 'Тестовый участник',
+                email: 'test@example.com',
+                isAdmin: false
+            };
+            
+            const testChallenge = {
+                id: Date.now().toString() + 'c',
+                userId: testUser.id,
+                configId: newConfig.id,
+                startDate: new Date().toISOString().split('T')[0],
+                initialWeight: 80,
+                contribution: 1000
+            };
+            
+            const testWeightRecord = {
+                id: Date.now().toString() + 'w',
+                userId: testUser.id,
+                date: new Date().toISOString().split('T')[0],
+                weight: 80
+            };
+            
+            users.push(testUser);
+            challenges.push(testChallenge);
+            weightRecords.push(testWeightRecord);
+            
+            saveUsers();
+            saveChallenges();
+            saveWeightRecords();
             
             closeModal();
             showAdminDashboard();
             
-            alert(`Челлендж "${name}" успешно создан!\n\nРегистрация: ${new Date(registrationStart).toLocaleDateString('ru-RU')} - ${new Date(registrationEnd).toLocaleDateString('ru-RU')}\nДлительность: ${duration} дней`);
+            alert(`Челлендж "${name}" успешно создан!\n\nРегистрация: ${new Date(registrationStart).toLocaleDateString('ru-RU')} - ${new Date(registrationEnd).toLocaleDateString('ru-RU')}\nДлительность: ${duration} дней\n\n✅ Автоматически создан тестовый участник!`);
         }
 
         function editChallengeConfig(configId) {
@@ -1697,6 +2283,13 @@
         }
 
         function addWeightRecord() {
+            // Проверяем, есть ли у пользователя активный челлендж
+            const userChallenge = challenges.find(c => c.userId === currentUser.id);
+            if (!userChallenge) {
+                alert('У вас нет активного челленджа! Администратор добавит вас в челлендж.');
+                return;
+            }
+            
             const modal = document.getElementById('modal');
             const modalContent = document.getElementById('modalContent');
             
@@ -1717,6 +2310,266 @@
             modal.style.display = 'flex';
         }
 
+        function addNewWeight() {
+            const weightInput = document.getElementById('newWeight');
+            const weight = parseFloat(weightInput.value);
+            
+            if (!weight || weight < 30 || weight > 200) {
+                alert('Пожалуйста, введите корректный вес от 30 до 200 кг');
+                return;
+            }
+            
+            // Проверяем, есть ли у пользователя активный челлендж
+            const userChallenge = challenges.find(c => c.userId === currentUser.id);
+            if (!userChallenge) {
+                alert('Сначала нужно присоединиться к челленджу!');
+                return;
+            }
+            
+            // Создаем новую запись веса с текущей датой
+            const today = new Date().toISOString().split('T')[0];
+            const weightRecord = {
+                id: generateId(),
+                userId: currentUser.id,
+                challengeId: userChallenge.id,
+                weight: weight,
+                date: today
+            };
+            
+            // Добавляем запись
+            weightRecords.push(weightRecord);
+            saveWeightRecords();
+            
+            // Очищаем поле ввода
+            weightInput.value = '';
+            
+            // Обновляем панель и график
+            showUserDashboard();
+            
+            alert(`Вес ${weight} кг успешно добавлен на ${today}!`);
+        }
+        
+        function showChallengeRequestForm() {
+            if (challengeConfigs.length === 0) {
+                alert('Сейчас нет доступных челленджей для участия!');
+                return;
+            }
+            
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            // Get available challenges for registration
+            const now = new Date();
+            const availableChallenges = challengeConfigs.filter(config => {
+                const regStart = new Date(config.registrationStart);
+                const regEnd = new Date(config.registrationEnd);
+                return now >= regStart && now <= regEnd;
+            });
+            
+            if (availableChallenges.length === 0) {
+                alert('Сейчас нет активных челленджей для регистрации!');
+                return;
+            }
+            
+            let challengeOptions = '';
+            availableChallenges.forEach(config => {
+                const regEnd = new Date(config.registrationEnd);
+                const daysLeft = Math.ceil((regEnd - now) / (1000 * 60 * 60 * 24));
+                challengeOptions += `<option value="${config.id}">${config.name} (регистрация до ${regEnd.toLocaleDateString('ru-RU')}, осталось ${daysLeft} дней)</option>`;
+            });
+            
+            modalContent.innerHTML = `
+                <h3>Подать заявку на участие в челлендже</h3>
+                <div class="form-group">
+                    <label>Выберите челлендж</label>
+                    <select id="challengeConfigSelect" required>
+                        <option value="">Выберите челлендж...</option>
+                        ${challengeOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Начальный вес (кг)</label>
+                    <input type="number" step="0.1" id="initialWeight" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="paymentConfirm" checked>
+                        Я подтверждаю оплату взноса 1000₽
+                    </label>
+                </div>
+                <button class="btn" onclick="submitChallengeRequest()">Подать заявку</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function submitChallengeRequest() {
+            const challengeConfigId = document.getElementById('challengeConfigSelect').value;
+            const initialWeight = parseFloat(document.getElementById('initialWeight').value);
+            const paymentConfirm = document.getElementById('paymentConfirm').checked;
+            
+            if (!challengeConfigId || !initialWeight) {
+                alert('Пожалуйста, заполните все поля!');
+                return;
+            }
+            
+            if (!paymentConfirm) {
+                alert('Необходимо подтвердить оплату взноса!');
+                return;
+            }
+            
+            // Create registration request
+            const request = {
+                id: generateId(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                email: currentUser.email,
+                challengeConfigId: challengeConfigId,
+                initialWeight: initialWeight,
+                contribution: 1000,
+                status: 'pending', // pending, approved, rejected
+                createdAt: new Date().toISOString(),
+                adminNotes: ''
+            };
+            
+            registrationRequests.push(request);
+            saveRegistrationRequests();
+            closeModal();
+            
+            alert('Заявка подана! Администратор рассмотрит её и свяжется с вами.');
+            showUserDashboard();
+        }
+        
+        function manageRegistrationRequests() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            const pendingRequests = registrationRequests.filter(r => r.status === 'pending');
+            const approvedRequests = registrationRequests.filter(r => r.status === 'approved');
+            const rejectedRequests = registrationRequests.filter(r => r.status === 'rejected');
+            
+            modalContent.innerHTML = `
+                <h3>📝 Управление заявками на участие</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>⏳ Ожидают рассмотрения (${pendingRequests.length})</h4>
+                    ${pendingRequests.length > 0 ? `
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${pendingRequests.map(request => {
+                                const config = challengeConfigs.find(c => c.id === request.challengeConfigId);
+                                return `
+                                    <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                            <strong>${request.username}</strong>
+                                            <span style="color: #666; font-size: 14px;">${new Date(request.createdAt).toLocaleDateString('ru-RU')}</span>
+                                        </div>
+                                        <p style="margin: 5px 0;"><strong>Email:</strong> ${request.email}</p>
+                                        <p style="margin: 5px 0;"><strong>Челлендж:</strong> ${config ? config.name : 'Неизвестно'}</p>
+                                        <p style="margin: 5px 0;"><strong>Начальный вес:</strong> ${request.initialWeight} кг</p>
+                                        <p style="margin: 5px 0;"><strong>Взнос:</strong> ${request.contribution} ₽</p>
+                                        <div style="margin-top: 10px;">
+                                            <button class="btn btn-small" onclick="approveRequest('${request.id}')" style="background: #10b981; margin-right: 5px;">✅ Одобрить</button>
+                                            <button class="btn btn-small" onclick="rejectRequest('${request.id}')" style="background: #ef4444;">❌ Отклонить</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : '<p style="color: #666; text-align: center;">Нет заявок на рассмотрение</p>'}
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>✅ Одобренные заявки (${approvedRequests.length})</h4>
+                    ${approvedRequests.length > 0 ? `
+                        <div style="max-height: 200px; overflow-y: auto;">
+                            ${approvedRequests.map(request => {
+                                const config = challengeConfigs.find(c => c.id === request.challengeConfigId);
+                                return `
+                                    <div style="background: #f0fdf4; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #10b981;">
+                                        <strong>${request.username}</strong> - ${config ? config.name : 'Неизвестно'} (${request.initialWeight} кг)
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : '<p style="color: #666; text-align: center;">Нет одобренных заявок</p>'}
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>❌ Отклоненные заявки (${rejectedRequests.length})</h4>
+                    ${rejectedRequests.length > 0 ? `
+                        <div style="max-height: 200px; overflow-y: auto;">
+                            ${rejectedRequests.map(request => {
+                                const config = challengeConfigs.find(c => c.id === request.challengeConfigId);
+                                return `
+                                    <div style="background: #fef2f2; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ef4444;">
+                                        <strong>${request.username}</strong> - ${config ? config.name : 'Неизвестно'} (${request.initialWeight} кг)
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : '<p style="color: #666; text-align: center;">Нет отклоненных заявок</p>'}
+                </div>
+                
+                <button class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function approveRequest(requestId) {
+            const request = registrationRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            // Update request status
+            request.status = 'approved';
+            request.adminNotes = 'Одобрено администратором';
+            saveRegistrationRequests();
+            
+            // Create challenge for user
+            const challenge = {
+                id: generateId(),
+                userId: request.userId,
+                configId: request.challengeConfigId,
+                startDate: new Date().toISOString().split('T')[0],
+                initialWeight: request.initialWeight,
+                contribution: request.contribution
+            };
+            
+            challenges.push(challenge);
+            saveChallenges();
+            
+            // Create initial weight record
+            const weightRecord = {
+                id: generateId(),
+                userId: request.userId,
+                challengeId: challenge.id,
+                weight: request.initialWeight,
+                date: challenge.startDate
+            };
+            
+            weightRecords.push(weightRecord);
+            saveWeightRecords();
+            
+            alert(`Заявка от ${request.username} одобрена! Участник добавлен в челлендж.`);
+            manageRegistrationRequests(); // Refresh the modal
+        }
+        
+        function rejectRequest(requestId) {
+            const request = registrationRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            const reason = prompt('Укажите причину отклонения заявки:');
+            if (reason === null) return; // User cancelled
+            
+            request.status = 'rejected';
+            request.adminNotes = reason || 'Отклонено администратором';
+            saveRegistrationRequests();
+            
+            alert(`Заявка от ${request.username} отклонена.`);
+            manageRegistrationRequests(); // Refresh the modal
+        }
+
         function saveWeightRecord() {
             const date = document.getElementById('weightDate').value;
             const weight = parseFloat(document.getElementById('weightValue').value);
@@ -1726,22 +2579,28 @@
                 return;
             }
             
+            // Проверяем, есть ли у пользователя активный челлендж
+            const userChallenge = challenges.find(c => c.userId === currentUser.id);
+            if (!userChallenge) {
+                alert('У вас нет активного челленджа!');
+                closeModal();
+                return;
+            }
+            
             const record = {
-                id: Date.now().toString(),
-                    userId: currentUser.id,
+                id: generateId(),
+                userId: currentUser.id,
+                challengeId: userChallenge.id,
                 date: date,
                 weight: weight
             };
             
             weightRecords.push(record);
             saveWeightRecords();
-                
-                closeModal();
-                showUserDashboard();
+            closeModal();
+            showUserDashboard();
             
-            // Show success message
-            const content = document.getElementById('dashboardContent');
-            content.innerHTML = '<div class="success-message">Запись веса успешно добавлена!</div>' + content.innerHTML;
+            alert(`Запись веса ${weight} кг на ${date} успешно добавлена!`);
         }
 
         function joinChallenge() {
@@ -1850,7 +2709,7 @@
             document.getElementById('modal').style.display = 'none';
         }
 
-                // Navigation
+        // Navigation
         document.getElementById('btnDashboard').addEventListener('click', function() {
             if (currentUser.isAdmin) {
                 showAdminDashboard();
@@ -1876,15 +2735,15 @@
                 `;
                 document.getElementById('dashboardContent').innerHTML = content;
             } else {
-                const content = `
-                    <div class="stat-card" style="max-width: 500px;">
-                        <h3>Профиль пользователя</h3>
-                        <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
-                        <p><strong>Email:</strong> ${currentUser.email}</p>
+            const content = `
+                <div class="stat-card" style="max-width: 500px;">
+                    <h3>Профиль пользователя</h3>
+                    <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
+                    <p><strong>Email:</strong> ${currentUser.email}</p>
                         <p><strong>Статус:</strong> Участник</p>
-                    </div>
-                `;
-                document.getElementById('dashboardContent').innerHTML = content;
+                </div>
+            `;
+            document.getElementById('dashboardContent').innerHTML = content;
             }
         });
 
@@ -1897,40 +2756,27 @@
         });
 
         document.getElementById('btnAdmin').addEventListener('click', function() {
-            showAdminDashboard();
+                showAdminDashboard();
         });
 
                 document.getElementById('btnLogout').addEventListener('click', function() {
-            currentUser = null;
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('authSection').style.display = 'flex';
-            document.getElementById('authForm').reset();
+                currentUser = null;
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('authSection').style.display = 'flex';
+                
+                // Reset all forms
+                document.getElementById('loginForm').reset();
+                document.getElementById('registrationForm').reset();
+                document.getElementById('adminLoginForm').reset();
+                
+                // Show login form by default
+                showLogin();
             
-            // Clear saved login data on logout
-            clearSavedLogin();
-        });
+                // Clear saved login data on logout
+                clearSavedLogin();
+            });
 
-        // Auth form submission
-        document.getElementById('authForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-            
-            if (!username || !email || !password) {
-                alert('Пожалуйста, заполните все поля');
-                return;
-            }
-            
-            const user = authenticateUser(username, email, password);
-            
-            // Save login data if "Remember me" is checked
-            saveLoginData(username, email, rememberMe);
-            
-            showDashboard();
-        });
+        // Auth form submission - removed old authForm handler
 
         // Close modal when clicking outside
         window.onclick = function(event) {
@@ -1942,7 +2788,18 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== PAGE LOADED v2.0 ===');
             initializeData();
+            
+            // Add event listeners for forms after DOM is loaded
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registrationForm').addEventListener('submit', handleRegistration);
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+            
+            // Force refresh if needed
+            if (performance.navigation.type === 1) {
+                console.log('Page was refreshed');
+            }
         });
     </script>
 </body>
