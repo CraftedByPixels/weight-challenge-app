@@ -289,12 +289,64 @@
             text-align: center;
         }
 
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        table tbody tr:hover {
+            background: #f8f8f8;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            margin: 0 2px;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
                 border-radius: 15px;
             }
-            
+
             .dashboard-nav {
                 flex-direction: column;
                 gap: 10px;
@@ -312,20 +364,20 @@
         <div id="authSection" class="auth-container">
             <form class="auth-form" id="authForm">
                 <h2>Weight Challenge</h2>
-                <div class="form-group">
+                    <div class="form-group">
                     <label>Имя пользователя</label>
-                    <input type="text" id="username" required>
-                </div>
-                <div class="form-group">
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="email" required>
                 </div>
                 <div class="form-group">
                     <label>Пароль</label>
-                    <input type="password" id="password" required>
-                </div>
+                        <input type="password" id="password" required>
+                    </div>
                 <button type="submit" class="btn">Войти / Зарегистрироваться</button>
-            </form>
+                </form>
         </div>
 
         <!-- Dashboard Section -->
@@ -366,7 +418,7 @@
             challenges = JSON.parse(localStorage.getItem('challenges')) || [];
             weightRecords = JSON.parse(localStorage.getItem('weightRecords')) || [];
             
-            // Create admin user if not exists
+                // Create admin user if not exists
             if (users.length === 0) {
                 const adminUser = {
                     id: 'admin',
@@ -420,8 +472,8 @@
                     id: Date.now().toString(),
                     username: username,
                     email: email,
-                    isAdmin: false
-                };
+                        isAdmin: false
+                    };
                 users.push(user);
                 saveUsers();
             }
@@ -430,10 +482,74 @@
             return user;
         }
 
-        function showDashboard() {
+                function showDashboard() {
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            showUserDashboard();
+            
+            if (currentUser.isAdmin) {
+                document.getElementById('dashboardTitle').textContent = 'Админ панель';
+                showAdminDashboard();
+            } else {
+                document.getElementById('dashboardTitle').textContent = `Добро пожаловать, ${currentUser.username}!`;
+                showUserDashboard();
+            }
+        }
+
+        function showAdminDashboard() {
+            let content = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Всего пользователей</h3>
+                        <div class="value">${users.filter(u => !u.isAdmin).length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Активных челленджей</h3>
+                        <div class="value">${challenges.length}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Призовой фонд</h3>
+                        <div class="value">${challenges.filter(c => c.paid).length * 1000} ₽</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Общий прогресс</h3>
+                        <div class="value">${getAverageProgress()}%</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Прогресс всех участников</h3>
+                    <canvas id="adminProgressChart"></canvas>
+                </div>
+                
+                <div class="table-container" style="margin-top: 20px;">
+                    <h3>Участники челленджа</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Пользователь</th>
+                                <th>Дата начала</th>
+                                <th>Начальный вес</th>
+                                <th>Текущий вес</th>
+                                <th>Прогресс (%)</th>
+                                <th>Статус оплаты</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateParticipantsTable()}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="addNewParticipant()">Добавить участника</button>
+                    <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
+                </div>
+            `;
+            
+            document.getElementById('dashboardContent').innerHTML = content;
+            
+            setTimeout(() => drawAdminProgressChart(), 100);
         }
 
         function showUserDashboard() {
@@ -516,6 +632,278 @@
             });
         }
 
+        function drawAdminProgressChart() {
+            const ctx = document.getElementById('adminProgressChart');
+            if (!ctx) return;
+            
+            const datasets = [];
+            let colorIndex = 0;
+            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
+            
+            challenges.forEach((challenge, index) => {
+                const records = weightRecords.filter(r => r.userId === challenge.userId);
+                if (records.length > 0) {
+                    const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(a.date));
+                    const user = users.find(u => u.id === challenge.userId);
+                    
+                    datasets.push({
+                        label: user ? user.username : `Участник ${index + 1}`,
+                        data: sortedRecords.map(r => ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100),
+                        borderColor: colors[colorIndex % colors.length],
+                        backgroundColor: colors[colorIndex % colors.length] + '20',
+                        tension: 0.4
+                    });
+                    colorIndex++;
+                }
+            });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Прогресс всех участников (% потери веса)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Потеря веса (%)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getAverageProgress() {
+            if (challenges.length === 0) return 0;
+            
+            let totalProgress = 0;
+            let validChallenges = 0;
+            
+            challenges.forEach(challenge => {
+                const records = weightRecords.filter(r => r.userId === challenge.userId);
+                if (records.length > 0) {
+                    const latestWeight = records[records.length - 1].weight;
+                    const progress = ((challenge.initialWeight - latestWeight) / challenge.initialWeight) * 100;
+                    totalProgress += progress;
+                    validChallenges++;
+                }
+            });
+            
+            return validChallenges > 0 ? Math.round(totalProgress / validChallenges) : 0;
+        }
+
+        function generateParticipantsTable() {
+            if (challenges.length === 0) {
+                return '<tr><td colspan="7" style="text-align: center;">Нет активных участников</td></tr>';
+            }
+            
+            let tableRows = '';
+            
+            challenges.forEach(challenge => {
+                const user = users.find(u => u.id === challenge.userId);
+                const records = weightRecords.filter(r => r.userId === challenge.userId);
+                const currentWeight = records.length > 0 ? records[records.length - 1].weight : challenge.initialWeight;
+                const progress = ((challenge.initialWeight - currentWeight) / challenge.initialWeight) * 100;
+                
+                tableRows += `
+                    <tr>
+                        <td>${user ? user.username : 'Неизвестно'}</td>
+                        <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
+                        <td>${challenge.initialWeight} кг</td>
+                        <td>${currentWeight} кг</td>
+                        <td>${progress.toFixed(1)}%</td>
+                        <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editParticipant('${challenge.id}')">✏️</button>
+                            <button class="btn-small btn-delete" onclick="deleteParticipant('${challenge.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            return tableRows;
+        }
+
+        function addNewParticipant() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h3>Добавить нового участника</h3>
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="newUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="newEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата начала</label>
+                    <input type="date" id="newStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Начальный вес (кг)</label>
+                    <input type="number" step="0.1" id="newInitialWeight" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="newPaymentConfirm">
+                        Оплата подтверждена
+                    </label>
+                </div>
+                <button class="btn" onclick="confirmAddParticipant()">Добавить участника</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function confirmAddParticipant() {
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            const startDate = document.getElementById('newStartDate').value;
+            const initialWeight = parseFloat(document.getElementById('newInitialWeight').value);
+            const paymentConfirm = document.getElementById('newPaymentConfirm').checked;
+            
+            if (!username || !email || !startDate || !initialWeight) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                username: username,
+                email: email,
+                isAdmin: false
+            };
+            users.push(newUser);
+            saveUsers();
+            
+            // Create challenge
+            const newChallenge = {
+                id: Date.now().toString() + 'c',
+                userId: newUser.id,
+                startDate: startDate,
+                initialWeight: initialWeight,
+                paid: paymentConfirm
+            };
+            challenges.push(newChallenge);
+            saveChallenges();
+            
+            // Create initial weight record
+            const weightRecord = {
+                id: Date.now().toString() + 'w',
+                userId: newUser.id,
+                date: startDate,
+                weight: initialWeight
+            };
+            weightRecords.push(weightRecord);
+            saveWeightRecords();
+            
+            closeModal();
+            showAdminDashboard();
+            
+            // Show success message
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = '<div class="success-message">Участник успешно добавлен!</div>' + content.innerHTML;
+        }
+
+        function editParticipant(challengeId) {
+            const challenge = challenges.find(c => c.id === challengeId);
+            const user = users.find(u => u.id === challenge.userId);
+            
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h3>Редактировать участника: ${user.username}</h3>
+                <div class="form-group">
+                    <label>Финальный вес (кг)</label>
+                    <input type="number" step="0.1" id="finalWeight" placeholder="Введите финальный вес">
+                </div>
+                <button class="btn" onclick="saveFinalWeight('${challenge.userId}')">Сохранить</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function saveFinalWeight(userId) {
+            const finalWeight = parseFloat(document.getElementById('finalWeight').value);
+            if (!finalWeight) {
+                alert('Пожалуйста, введите корректный вес');
+                return;
+            }
+            
+            const weightRecord = {
+                id: Date.now().toString(),
+                userId: userId,
+                date: new Date().toISOString().split('T')[0],
+                weight: finalWeight
+            };
+            
+            weightRecords.push(weightRecord);
+            saveWeightRecords();
+            
+            closeModal();
+            showAdminDashboard();
+        }
+
+        function deleteParticipant(challengeId) {
+            if (confirm('Вы уверены, что хотите удалить этого участника?')) {
+                const challenge = challenges.find(c => c.id === challengeId);
+                
+                // Remove challenge
+                challenges = challenges.filter(c => c.id !== challengeId);
+                saveChallenges();
+                
+                // Remove weight records
+                weightRecords = weightRecords.filter(r => r.userId !== challenge.userId);
+                saveWeightRecords();
+                
+                // Remove user (if not admin)
+                const user = users.find(u => u.id === challenge.userId);
+                if (user && !user.isAdmin) {
+                    users = users.filter(u => u.id !== challenge.userId);
+                    saveUsers();
+                }
+                
+                showAdminDashboard();
+            }
+        }
+
+        function exportData() {
+            const data = {
+                users: users.filter(u => !u.isAdmin),
+                challenges: challenges,
+                weightRecords: weightRecords
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'weight-challenge-data.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
         function addWeightRecord() {
             const modal = document.getElementById('modal');
             const modalContent = document.getElementById('modalContent');
@@ -548,16 +936,16 @@
             
             const record = {
                 id: Date.now().toString(),
-                userId: currentUser.id,
+                    userId: currentUser.id,
                 date: date,
                 weight: weight
             };
             
             weightRecords.push(record);
             saveWeightRecords();
-            
-            closeModal();
-            showUserDashboard();
+                
+                closeModal();
+                showUserDashboard();
             
             // Show success message
             const content = document.getElementById('dashboardContent');
@@ -637,7 +1025,7 @@
 
         // Navigation
         document.getElementById('btnDashboard').addEventListener('click', function() {
-            showUserDashboard();
+                showUserDashboard();
         });
 
         document.getElementById('btnProfile').addEventListener('click', function() {
@@ -653,14 +1041,14 @@
         });
 
         document.getElementById('btnProgress').addEventListener('click', function() {
-            showUserDashboard();
+                showUserDashboard();
         });
 
         document.getElementById('btnLogout').addEventListener('click', function() {
-            currentUser = null;
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('authSection').style.display = 'flex';
-            document.getElementById('authForm').reset();
+                currentUser = null;
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('authSection').style.display = 'flex';
+                document.getElementById('authForm').reset();
         });
 
         // Auth form submission
