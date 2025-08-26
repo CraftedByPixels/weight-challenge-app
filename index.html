@@ -649,6 +649,14 @@
             challengeConfigs = JSON.parse(localStorage.getItem('challengeConfigs')) || [];
             registrationRequests = JSON.parse(localStorage.getItem('registrationRequests')) || [];
             
+            console.log('=== DEBUG DATA LOADING ===');
+            console.log('users:', users);
+            console.log('challenges:', challenges);
+            console.log('weightRecords:', weightRecords);
+            console.log('challengeConfigs:', challengeConfigs);
+            console.log('registrationRequests:', registrationRequests);
+            console.log('challengeConfigs.length:', challengeConfigs.length);
+            
                 // Create admin user if not exists
             if (users.length === 0) {
                 const adminUser = {
@@ -962,6 +970,12 @@
         }
 
         function showUserDashboard() {
+            console.log('=== DEBUG: showUserDashboard ===');
+            console.log('currentUser:', currentUser);
+            console.log('challenges:', challenges);
+            console.log('challengeConfigs:', challengeConfigs);
+            console.log('challengeConfigs.length:', challengeConfigs.length);
+            
             const userChallenges = challenges.filter(c => c.userId === currentUser.id);
             const userWeightRecords = weightRecords.filter(w => w.userId === currentUser.id);
             
