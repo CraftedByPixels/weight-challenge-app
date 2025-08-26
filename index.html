@@ -371,7 +371,7 @@
                 const adminUser = {
                     id: 'admin',
                     username: 'admin',
-                    email: 'admin@example.com',
+                    email: 'randeako@gmail.com',
                     isAdmin: true
                 };
                 users.push(adminUser);
@@ -394,6 +394,24 @@
 
         // Auth functions
         function authenticateUser(username, email, password) {
+            // Check for admin login
+            if (username === 'admin' && email === 'randeako@gmail.com' && password === 'admin123') {
+                let adminUser = users.find(u => u.isAdmin);
+                if (!adminUser) {
+                    adminUser = {
+                        id: 'admin',
+                        username: 'admin',
+                        email: 'randeako@gmail.com',
+                        isAdmin: true
+                    };
+                    users.push(adminUser);
+                    saveUsers();
+                }
+                currentUser = adminUser;
+                return adminUser;
+            }
+            
+            // Regular user authentication
             let user = users.find(u => u.email === email);
             
             if (!user) {
