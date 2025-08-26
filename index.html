@@ -5,31 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weight Challenge - Челлендж по снижению веса</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBO7noUg7utfXx5OCz0tRd6cDm-QASS7tI",
-            authDomain: "weight-challenge-app-d6aba.firebaseapp.com",
-            projectId: "weight-challenge-app-d6aba",
-            storageBucket: "weight-challenge-app-d6aba.firebasestorage.app",
-            messagingSenderId: "972056654811",
-            appId: "1:972056654811:web:9174cb84ff12af7b646dfe"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Make Firebase available globally
-        window.firebase = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot };
-    </script>
+    
     <style>
         * {
             margin: 0;
@@ -200,23 +176,13 @@
             font-weight: 600;
             margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .stat-card .value {
-            color: #333;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-        }
-
-        .stat-card .change {
-            color: #22c55e;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .stat-card .change.negative {
-            color: #ef4444;
+            color: #333;
         }
 
         .chart-container {
@@ -224,85 +190,20 @@
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .chart-container h3 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        table th, table td {
-            padding: 15px;
-            text-align: left;
-        }
-
-        table tbody tr {
-            border-bottom: 1px solid #e0e0e0;
-            transition: background 0.2s;
-        }
-
-        table tbody tr:hover {
-            background: #f8f8f8;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .btn-edit {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-view {
-            background: #10b981;
-            color: white;
+            margin-top: 20px;
         }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
         }
 
         .modal-content {
@@ -320,55 +221,87 @@
             color: #333;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            transition: width 0.5s ease;
-        }
-
-        .weight-input-container {
+        .weight-input {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .weight-input-container input {
+        .weight-input input {
             flex: 1;
         }
 
-        .weight-input-container button {
-            padding: 10px 20px;
+        .weight-input button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .weight-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .weight-record {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .weight-record:last-child {
+            border-bottom: none;
+        }
+
+        .delete-btn {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .success-message {
+            background: #48bb78;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #f56565;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .container {
+                margin: 10px;
+                border-radius: 15px;
             }
-
+            
             .dashboard-nav {
                 flex-direction: column;
+                gap: 10px;
             }
-
-            table {
-                font-size: 14px;
-            }
-
-            table th, table td {
-                padding: 10px;
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -377,25 +310,22 @@
     <div class="container">
         <!-- Auth Section -->
         <div id="authSection" class="auth-container">
-            <div class="auth-form">
-                <h2 id="authTitle">Вход в систему</h2>
-                <form id="authForm">
-                    <div class="form-group">
-                        <label for="username">Имя пользователя</label>
-                        <input type="text" id="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Пароль</label>
-                        <input type="password" id="password" required>
-                    </div>
-                    <div class="form-group" id="emailGroup" style="display:none;">
-                        <label for="email">Email</label>
-                        <input type="email" id="email">
-                    </div>
-                    <button type="submit" class="btn" id="authSubmit">Войти</button>
-                    <button type="button" class="btn btn-secondary" id="authToggle">Создать аккаунт</button>
-                </form>
-            </div>
+            <form class="auth-form" id="authForm">
+                <h2>Weight Challenge</h2>
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn">Войти / Зарегистрироваться</button>
+            </form>
         </div>
 
         <!-- Dashboard Section -->
@@ -407,7 +337,6 @@
                     <button class="nav-btn" id="btnDashboard">Главная</button>
                     <button class="nav-btn" id="btnProfile">Профиль</button>
                     <button class="nav-btn" id="btnProgress">Прогресс</button>
-                    <button class="nav-btn" id="btnAdmin" style="display:none;">Админ панель</button>
                     <button class="nav-btn" id="btnLogout">Выйти</button>
                 </div>
             </div>
@@ -425,387 +354,126 @@
     </div>
 
     <script>
-        // Data storage
+        // Data storage using localStorage
         let currentUser = null;
         let users = [];
         let challenges = [];
         let weightRecords = [];
 
-        // Initialize Firebase data
-        async function initializeFirebaseData() {
-            try {
-                // Create admin user if not exists
+        // Initialize data from localStorage
+        function initializeData() {
+            users = JSON.parse(localStorage.getItem('users')) || [];
+            challenges = JSON.parse(localStorage.getItem('challenges')) || [];
+            weightRecords = JSON.parse(localStorage.getItem('weightRecords')) || [];
+            
+            // Create admin user if not exists
+            if (users.length === 0) {
                 const adminUser = {
+                    id: 'admin',
                     username: 'admin',
                     email: 'admin@example.com',
                     isAdmin: true
                 };
-                
-                // Check if admin exists
-                const adminQuery = query(collection(window.firebase.db, 'users'), where('username', '==', 'admin'));
-                const adminSnapshot = await getDocs(adminQuery);
-                
-                if (adminSnapshot.empty) {
-                    // Create admin user
-                    const adminDoc = await addDoc(collection(window.firebase.db, 'users'), adminUser);
-                    console.log('Admin user created with ID:', adminDoc.id);
-                }
-                
-                // Load existing data
-                await loadUsers();
-                await loadChallenges();
-                await loadWeightRecords();
-                
-            } catch (error) {
-                console.error('Error initializing Firebase data:', error);
+                users.push(adminUser);
+                saveUsers();
             }
         }
 
-        // Load users from Firestore
-        async function loadUsers() {
-            try {
-                const querySnapshot = await getDocs(collection(window.firebase.db, 'users'));
-                users = [];
-                querySnapshot.forEach((doc) => {
-                    users.push({ id: doc.id, ...doc.data() });
-                });
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
+        // Save data to localStorage
+        function saveUsers() {
+            localStorage.setItem('users', JSON.stringify(users));
         }
 
-        // Load challenges from Firestore
-        async function loadChallenges() {
-            try {
-                const querySnapshot = await getDocs(collection(window.firebase.db, 'challenges'));
-                challenges = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    challenges.push({
-                        id: doc.id,
-                        userId: data.userId,
-                        startDate: data.startDate.toDate(),
-                        initialWeight: data.initialWeight,
-                        paid: data.paid
-                    });
-                });
-            } catch (error) {
-                console.error('Error loading challenges:', error);
-            }
+        function saveChallenges() {
+            localStorage.setItem('challenges', JSON.stringify(challenges));
         }
 
-        // Load weight records from Firestore
-        async function loadWeightRecords() {
-            try {
-                const querySnapshot = await getDocs(collection(window.firebase.db, 'weightRecords'));
-                weightRecords = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    weightRecords.push({
-                        id: doc.id,
-                        userId: data.userId,
-                        date: data.date.toDate(),
-                        weight: data.weight
-                    });
-                });
-            } catch (error) {
-                console.error('Error loading weight records:', error);
-            }
+        function saveWeightRecords() {
+            localStorage.setItem('weightRecords', JSON.stringify(weightRecords));
         }
 
         // Auth functions
-        document.getElementById('authToggle').addEventListener('click', function() {
-            const isLogin = document.getElementById('authTitle').textContent === 'Вход в систему';
-            document.getElementById('authTitle').textContent = isLogin ? 'Регистрация' : 'Вход в систему';
-            document.getElementById('authSubmit').textContent = isLogin ? 'Создать аккаунт' : 'Войти';
-            document.getElementById('authToggle').textContent = isLogin ? 'Уже есть аккаунт' : 'Создать аккаунт';
-            document.getElementById('emailGroup').style.display = isLogin ? 'block' : 'none';
-        });
-
-        document.getElementById('authForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const email = document.getElementById('email').value;
-            const isLogin = document.getElementById('authTitle').textContent === 'Вход в систему';
-
-            try {
-                if (isLogin) {
-                    // Login with email (username@example.com)
-                    const userEmail = username.includes('@') ? username : username + '@example.com';
-                    const userCredential = await window.firebase.signInWithEmailAndPassword(window.firebase.auth, userEmail, password);
-                    
-                    // Find user in our users array
-                    const user = users.find(u => u.email === userEmail);
-                    if (user) {
-                        currentUser = user;
-                        showDashboard();
-                    } else {
-                        alert('Пользователь не найден');
-                    }
-                } else {
-                    // Register new user
-                    if (users.find(u => u.username === username)) {
-                        alert('Пользователь с таким именем уже существует');
-                        return;
-                    }
-                    
-                    const userEmail = email || username + '@example.com';
-                    const userCredential = await window.firebase.createUserWithEmailAndPassword(window.firebase.auth, userEmail, password);
-                    
-                    const newUser = {
-                        id: userCredential.user.uid,
-                        username,
-                        email: userEmail,
-                        isAdmin: false
-                    };
-                    
-                    // Save to Firestore
-                    await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'users'), newUser);
-                    
-                    users.push(newUser);
-                    currentUser = newUser;
-                    showDashboard();
-                }
-            } catch (error) {
-                console.error('Auth error:', error);
-                if (error.code === 'auth/user-not-found') {
-                    alert('Пользователь не найден');
-                } else if (error.code === 'auth/wrong-password') {
-                    alert('Неверный пароль');
-                } else if (error.code === 'auth/email-already-in-use') {
-                    alert('Email уже используется');
-                } else {
-                    alert('Ошибка аутентификации: ' + error.message);
-                }
+        function authenticateUser(username, email, password) {
+            let user = users.find(u => u.email === email);
+            
+            if (!user) {
+                // Create new user
+                user = {
+                    id: Date.now().toString(),
+                    username: username,
+                    email: email,
+                    isAdmin: false
+                };
+                users.push(user);
+                saveUsers();
             }
-        });
+            
+            currentUser = user;
+            return user;
+        }
 
         function showDashboard() {
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            
-            if (currentUser.isAdmin) {
-                document.getElementById('btnAdmin').style.display = 'block';
-                document.getElementById('dashboardTitle').textContent = 'Админ панель';
-                showAdminDashboard();
-            } else {
-                document.getElementById('dashboardTitle').textContent = `Добро пожаловать, ${currentUser.username}!`;
-                showUserDashboard();
-            }
+            showUserDashboard();
         }
 
         function showUserDashboard() {
-            const challenge = challenges.find(c => c.userId === currentUser.id);
-            let content = '<div class="stats-grid">';
+            const userChallenges = challenges.filter(c => c.userId === currentUser.id);
+            const userWeightRecords = weightRecords.filter(w => w.userId === currentUser.id);
             
-            if (challenge) {
-                const latestWeight = getLatestWeight(currentUser.id);
-                const weightLoss = challenge.initialWeight - latestWeight;
-                const weightLossPercent = ((weightLoss / challenge.initialWeight) * 100).toFixed(2);
-                const daysInChallenge = Math.floor((new Date() - new Date(challenge.startDate)) / (1000 * 60 * 60 * 24));
-                const daysLeft = Math.max(0, 14 - daysInChallenge);
-                
-                content += `
-                    <div class="stat-card">
-                        <h3>Начальный вес</h3>
-                        <div class="value">${challenge.initialWeight} кг</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Текущий вес</h3>
-                        <div class="value">${latestWeight} кг</div>
-                        <div class="change ${weightLoss > 0 ? '' : 'negative'}">
-                            ${weightLoss > 0 ? '↓' : '↑'} ${Math.abs(weightLoss).toFixed(1)} кг
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Прогресс</h3>
-                        <div class="value">${weightLossPercent}%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${Math.min(100, Math.abs(weightLossPercent) * 10)}%">
-                                ${weightLossPercent}%
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Дней в челлендже</h3>
-                        <div class="value">${daysInChallenge} / 14</div>
-                        <div class="change">Осталось: ${daysLeft} дней</div>
-                    </div>
-                `;
-            } else {
-                content += `
-                    <div class="stat-card">
-                        <h3>Статус</h3>
-                        <div class="value">Не участвуете</div>
-                        <button class="btn" onclick="joinChallenge()">Присоединиться к челленджу</button>
-                    </div>
-                `;
-            }
-            
-            content += '</div>';
-            
-            if (challenge) {
-                content += `
-                    <div class="weight-input-container">
-                        <input type="number" step="0.1" id="newWeight" placeholder="Введите текущий вес (кг)">
-                        <button class="btn" onclick="addWeightRecord()">Добавить измерение</button>
-                    </div>
-                    <div class="chart-container" style="margin-top: 30px;">
-                        <h3>График изменения веса участников (%)</h3>
-                        <canvas id="weightChart"></canvas>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('dashboardContent').innerHTML = content;
-            
-            if (challenge) {
-                setTimeout(() => drawChart(), 100);
-            }
-        }
-
-        function showAdminDashboard() {
             let content = `
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <h3>Всего участников</h3>
-                        <div class="value">${challenges.length}</div>
+                        <h3>Активные челленджи</h3>
+                        <div class="value">${userChallenges.length}</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Призовой фонд</h3>
-                        <div class="value">${challenges.filter(c => c.paid).length * 1000} ₽</div>
+                        <h3>Записи веса</h3>
+                        <div class="value">${userWeightRecords.length}</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Активных челленджей</h3>
-                        <div class="value">${getActiveChallenges().length}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Лидер</h3>
-                        <div class="value">${getLeader()}</div>
+                        <h3>Текущий вес</h3>
+                        <div class="value">${userWeightRecords.length > 0 ? userWeightRecords[userWeightRecords.length - 1].weight + ' кг' : 'Не указан'}</div>
                     </div>
                 </div>
                 
-                <div class="table-container" style="margin-top: 30px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Участник</th>
-                                <th>Дата начала</th>
-                                <th>Начальный вес</th>
-                                <th>Текущий вес</th>
-                                <th>Прогресс (%)</th>
-                                <th>Дней в челлендже</th>
-                                <th>Статус оплаты</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            challenges.forEach(challenge => {
-                const user = users.find(u => u.id === challenge.userId);
-                const latestWeight = getLatestWeight(challenge.userId);
-                const weightLoss = challenge.initialWeight - latestWeight;
-                const weightLossPercent = ((weightLoss / challenge.initialWeight) * 100).toFixed(2);
-                const daysInChallenge = Math.floor((new Date() - new Date(challenge.startDate)) / (1000 * 60 * 60 * 24));
-                
-                content += `
-                    <tr>
-                        <td>${user.username}</td>
-                        <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
-                        <td>${challenge.initialWeight} кг</td>
-                        <td>${latestWeight} кг</td>
-                        <td>${weightLossPercent}%</td>
-                        <td>${daysInChallenge} / 14</td>
-                        <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-small btn-edit" onclick="editParticipant(${challenge.id})">✏️</button>
-                                <button class="btn-small btn-view" onclick="viewParticipant(${challenge.userId})">👁️</button>
-                                <button class="btn-small btn-delete" onclick="deleteParticipant(${challenge.id})">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            content += `
-                        </tbody>
-                    </table>
+                <div class="chart-container">
+                    <h3>Ваш прогресс</h3>
+                    <canvas id="progressChart"></canvas>
                 </div>
-                <button class="btn" style="margin-top: 20px;" onclick="addNewParticipant()">Добавить участника</button>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="addWeightRecord()">Добавить запись веса</button>
+                    <button class="btn btn-secondary" onclick="joinChallenge()">Присоединиться к челленджу</button>
+                </div>
             `;
             
             document.getElementById('dashboardContent').innerHTML = content;
-        }
-
-        function getLatestWeight(userId) {
-            const records = weightRecords.filter(r => r.userId === userId);
-            if (records.length === 0) {
-                const challenge = challenges.find(c => c.userId === userId);
-                return challenge ? challenge.initialWeight : 0;
+            
+            if (userWeightRecords.length > 0) {
+                setTimeout(() => drawProgressChart(userWeightRecords), 100);
             }
-            records.sort((a, b) => new Date(b.date) - new Date(a.date));
-            return records[0].weight;
         }
 
-        function getActiveChallenges() {
-            const now = new Date();
-            return challenges.filter(c => {
-                const daysInChallenge = Math.floor((now - new Date(c.startDate)) / (1000 * 60 * 60 * 24));
-                return daysInChallenge <= 14;
-            });
-        }
-
-        function getLeader() {
-            let leader = null;
-            let maxLoss = 0;
+        function drawProgressChart(records) {
+            const ctx = document.getElementById('progressChart');
+            if (!ctx) return;
             
-            challenges.forEach(challenge => {
-                const user = users.find(u => u.id === challenge.userId);
-                const latestWeight = getLatestWeight(challenge.userId);
-                const weightLossPercent = ((challenge.initialWeight - latestWeight) / challenge.initialWeight) * 100;
-                
-                if (weightLossPercent > maxLoss) {
-                    maxLoss = weightLossPercent;
-                    leader = user.username;
-                }
-            });
-            
-            return leader || 'Нет данных';
-        }
-
-        function drawChart() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            const datasets = [];
-            let colorIndex = 0;
-            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
-            
-            challenges.forEach((challenge, index) => {
-                const records = weightRecords.filter(r => r.userId === challenge.userId);
-                records.sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                if (records.length > 0) {
-                    const data = records.map(r => ({
-                        x: new Date(r.date),
-                        y: ((challenge.initialWeight - r.weight) / challenge.initialWeight) * 100
-                    }));
-                    
-                    datasets.push({
-                        label: `Участник ${index + 1}`,
-                        data: data,
-                        borderColor: colors[colorIndex % colors.length],
-                        backgroundColor: colors[colorIndex % colors.length] + '20',
-                        tension: 0.4
-                    });
-                    colorIndex++;
-                }
-            });
+            const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
             
             new Chart(ctx, {
                 type: 'line',
-                data: { datasets },
+                data: {
+                    labels: sortedRecords.map(r => new Date(r.date).toLocaleDateString('ru-RU')),
+                    datasets: [{
+                        label: 'Вес (кг)',
+                        data: sortedRecords.map(r => r.weight),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
                 options: {
                     responsive: true,
                     plugins: {
@@ -814,29 +482,68 @@
                         },
                         title: {
                             display: true,
-                            text: 'Прогресс участников (% потери веса)'
+                            text: 'Прогресс снижения веса'
                         }
                     },
                     scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'dd.MM'
-                                }
-                            }
-                        },
                         y: {
-                            beginAtZero: true,
+                            beginAtZero: false,
                             title: {
                                 display: true,
-                                text: 'Потеря веса (%)'
+                                text: 'Вес (кг)'
                             }
                         }
                     }
                 }
             });
+        }
+
+        function addWeightRecord() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h3>Добавить запись веса</h3>
+                <div class="form-group">
+                    <label>Дата</label>
+                    <input type="date" id="weightDate" value="${new Date().toISOString().split('T')[0]}" required>
+                </div>
+                <div class="form-group">
+                    <label>Вес (кг)</label>
+                    <input type="number" step="0.1" id="weightValue" required>
+                </div>
+                <button class="btn" onclick="saveWeightRecord()">Сохранить</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function saveWeightRecord() {
+            const date = document.getElementById('weightDate').value;
+            const weight = parseFloat(document.getElementById('weightValue').value);
+            
+            if (!date || !weight) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+            
+            const record = {
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                date: date,
+                weight: weight
+            };
+            
+            weightRecords.push(record);
+            saveWeightRecords();
+            
+            closeModal();
+            showUserDashboard();
+            
+            // Show success message
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = '<div class="success-message">Запись веса успешно добавлена!</div>' + content.innerHTML;
         }
 
         function joinChallenge() {
@@ -846,8 +553,8 @@
             modalContent.innerHTML = `
                 <h3>Присоединиться к челленджу</h3>
                 <div class="form-group">
-                    <label>Дата начала (25.08.2025 - 08.09.2025)</label>
-                    <input type="date" id="startDate" min="2025-08-25" max="2025-09-08" required>
+                    <label>Дата начала</label>
+                    <input type="date" id="startDate" min="${new Date().toISOString().split('T')[0]}" required>
                 </div>
                 <div class="form-group">
                     <label>Начальный вес (кг)</label>
@@ -866,7 +573,7 @@
             modal.style.display = 'flex';
         }
 
-        async function confirmJoinChallenge() {
+        function confirmJoinChallenge() {
             const startDate = document.getElementById('startDate').value;
             const initialWeight = parseFloat(document.getElementById('initialWeight').value);
             const paymentConfirm = document.getElementById('paymentConfirm').checked;
@@ -876,209 +583,34 @@
                 return;
             }
             
-            try {
-                const newChallenge = {
-                    userId: currentUser.id,
-                    startDate: new Date(startDate),
-                    initialWeight: initialWeight,
-                    paid: paymentConfirm
-                };
-                
-                // Save challenge to Firestore
-                const challengeDoc = await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'challenges'), newChallenge);
-                newChallenge.id = challengeDoc.id;
-                challenges.push(newChallenge);
-                
-                // Save initial weight record
-                const weightRecord = {
-                    userId: currentUser.id,
-                    date: new Date(startDate),
-                    weight: initialWeight
-                };
-                
-                await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'weightRecords'), weightRecord);
-                weightRecords.push(weightRecord);
-                
-                closeModal();
-                showUserDashboard();
-            } catch (error) {
-                console.error('Error joining challenge:', error);
-                alert('Ошибка при присоединении к челленджу');
-            }
-        }
-
-        async function addWeightRecord() {
-            const weight = parseFloat(document.getElementById('newWeight').value);
-            if (!weight) {
-                alert('Пожалуйста, введите корректный вес');
-                return;
-            }
-            
-            try {
-                const weightRecord = {
-                    userId: currentUser.id,
-                    date: new Date(),
-                    weight: weight
-                };
-                
-                // Save to Firestore
-                await window.firebase.addDoc(window.firebase.collection(window.firebase.db, 'weightRecords'), weightRecord);
-                
-                weightRecords.push(weightRecord);
-                document.getElementById('newWeight').value = '';
-                showUserDashboard();
-            } catch (error) {
-                console.error('Error adding weight record:', error);
-                alert('Ошибка при сохранении данных');
-            }
-        }
-
-        function editParticipant(challengeId) {
-            const challenge = challenges.find(c => c.id === challengeId);
-            const user = users.find(u => u.id === challenge.userId);
-            
-            const modal = document.getElementById('modal');
-            const modalContent = document.getElementById('modalContent');
-            
-            modalContent.innerHTML = `
-                <h3>Редактировать участника: ${user.username}</h3>
-                <div class="form-group">
-                    <label>Финальный вес (кг)</label>
-                    <input type="number" step="0.1" id="finalWeight" placeholder="Введите финальный вес">
-                </div>
-                <button class="btn" onclick="saveFinalWeight(${challenge.userId})">Сохранить</button>
-                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
-            `;
-            
-            modal.style.display = 'flex';
-        }
-
-        function saveFinalWeight(userId) {
-            const finalWeight = parseFloat(document.getElementById('finalWeight').value);
-            if (!finalWeight) {
-                alert('Пожалуйста, введите корректный вес');
-                return;
-            }
-            
-            weightRecords.push({
-                userId: userId,
-                date: new Date(),
-                weight: finalWeight
-            });
-            
-            closeModal();
-            showAdminDashboard();
-        }
-
-        function viewParticipant(userId) {
-            const user = users.find(u => u.id === userId);
-            const challenge = challenges.find(c => c.userId === userId);
-            const records = weightRecords.filter(r => r.userId === userId);
-            
-            const modal = document.getElementById('modal');
-            const modalContent = document.getElementById('modalContent');
-            
-            let recordsHtml = '<ul>';
-            records.sort((a, b) => new Date(b.date) - new Date(a.date));
-            records.forEach(record => {
-                recordsHtml += `<li>${new Date(record.date).toLocaleDateString('ru-RU')} - ${record.weight} кг</li>`;
-            });
-            recordsHtml += '</ul>';
-            
-            modalContent.innerHTML = `
-                <h3>Профиль участника: ${user.username}</h3>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Дата начала:</strong> ${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</p>
-                <p><strong>Начальный вес:</strong> ${challenge.initialWeight} кг</p>
-                <p><strong>История измерений:</strong></p>
-                ${recordsHtml}
-                <button class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
-            `;
-            
-            modal.style.display = 'flex';
-        }
-
-        function deleteParticipant(challengeId) {
-            if (confirm('Вы уверены, что хотите удалить этого участника?')) {
-                const challenge = challenges.find(c => c.id === challengeId);
-                challenges = challenges.filter(c => c.id !== challengeId);
-                weightRecords = weightRecords.filter(r => r.userId !== challenge.userId);
-                showAdminDashboard();
-            }
-        }
-
-        function addNewParticipant() {
-            const modal = document.getElementById('modal');
-            const modalContent = document.getElementById('modalContent');
-            
-            const availableUsers = users.filter(u => !u.isAdmin && !challenges.find(c => c.userId === u.id));
-            
-            if (availableUsers.length === 0) {
-                alert('Нет доступных пользователей для добавления');
-                return;
-            }
-            
-            let userOptions = '';
-            availableUsers.forEach(user => {
-                userOptions += `<option value="${user.id}">${user.username}</option>`;
-            });
-            
-            modalContent.innerHTML = `
-                <h3>Добавить нового участника</h3>
-                <div class="form-group">
-                    <label>Выберите пользователя</label>
-                    <select id="selectedUser">${userOptions}</select>
-                </div>
-                <div class="form-group">
-                    <label>Дата начала</label>
-                    <input type="date" id="startDate" min="2025-08-25" max="2025-09-08" required>
-                </div>
-                <div class="form-group">
-                    <label>Начальный вес (кг)</label>
-                    <input type="number" step="0.1" id="initialWeight" required>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="paymentConfirm">
-                        Оплата подтверждена
-                    </label>
-                </div>
-                <button class="btn" onclick="confirmAddParticipant()">Добавить</button>
-                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
-            `;
-            
-            modal.style.display = 'flex';
-        }
-
-        function confirmAddParticipant() {
-            const userId = parseInt(document.getElementById('selectedUser').value);
-            const startDate = document.getElementById('startDate').value;
-            const initialWeight = parseFloat(document.getElementById('initialWeight').value);
-            const paymentConfirm = document.getElementById('paymentConfirm').checked;
-            
-            if (!startDate || !initialWeight) {
-                alert('Пожалуйста, заполните все поля');
-                return;
-            }
-            
             const newChallenge = {
-                id: challenges.length + 1,
-                userId: userId,
-                startDate: new Date(startDate),
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                startDate: startDate,
                 initialWeight: initialWeight,
                 paid: paymentConfirm
             };
             
             challenges.push(newChallenge);
+            saveChallenges();
             
-            weightRecords.push({
-                userId: userId,
-                date: new Date(startDate),
+            // Save initial weight record
+            const weightRecord = {
+                id: Date.now().toString() + 'w',
+                userId: currentUser.id,
+                date: startDate,
                 weight: initialWeight
-            });
+            };
+            
+            weightRecords.push(weightRecord);
+            saveWeightRecords();
             
             closeModal();
-            showAdminDashboard();
+            showUserDashboard();
+            
+            // Show success message
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = '<div class="success-message">Вы успешно присоединились к челленджу!</div>' + content.innerHTML;
         }
 
         function closeModal() {
@@ -1087,11 +619,7 @@
 
         // Navigation
         document.getElementById('btnDashboard').addEventListener('click', function() {
-            if (currentUser.isAdmin) {
-                showAdminDashboard();
-            } else {
-                showUserDashboard();
-            }
+            showUserDashboard();
         });
 
         document.getElementById('btnProfile').addEventListener('click', function() {
@@ -1107,36 +635,31 @@
         });
 
         document.getElementById('btnProgress').addEventListener('click', function() {
-            if (currentUser.isAdmin) {
-                const content = `
-                    <div class="chart-container">
-                        <h3>Общий прогресс всех участников</h3>
-                        <canvas id="allProgressChart"></canvas>
-                    </div>
-                `;
-                document.getElementById('dashboardContent').innerHTML = content;
-                setTimeout(() => drawChart(), 100);
-            } else {
-                showUserDashboard();
-            }
+            showUserDashboard();
         });
 
-        document.getElementById('btnAdmin').addEventListener('click', function() {
-            if (currentUser.isAdmin) {
-                showAdminDashboard();
-            }
+        document.getElementById('btnLogout').addEventListener('click', function() {
+            currentUser = null;
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('authForm').reset();
         });
 
-        document.getElementById('btnLogout').addEventListener('click', async function() {
-            try {
-                await window.firebase.signOut(window.firebase.auth);
-                currentUser = null;
-                document.getElementById('dashboard').style.display = 'none';
-                document.getElementById('authSection').style.display = 'flex';
-                document.getElementById('authForm').reset();
-            } catch (error) {
-                console.error('Logout error:', error);
+        // Auth form submission
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !email || !password) {
+                alert('Пожалуйста, заполните все поля');
+                return;
             }
+            
+            const user = authenticateUser(username, email, password);
+            showDashboard();
         });
 
         // Close modal when clicking outside
@@ -1148,29 +671,8 @@
         }
 
         // Initialize app
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                await initializeFirebaseData();
-                
-                // Listen for auth state changes
-                window.firebase.onAuthStateChanged(window.firebase.auth, (user) => {
-                    if (user) {
-                        // User is signed in
-                        const foundUser = users.find(u => u.email === user.email);
-                        if (foundUser) {
-                            currentUser = foundUser;
-                            showDashboard();
-                        }
-                    } else {
-                        // User is signed out
-                        currentUser = null;
-                        document.getElementById('dashboard').style.display = 'none';
-                        document.getElementById('authSection').style.display = 'flex';
-                    }
-                });
-            } catch (error) {
-                console.error('Error initializing app:', error);
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
         });
     </script>
 </body>
