@@ -559,6 +559,11 @@
         }
 
         function showAdminDashboard() {
+            // Debug information
+            console.log('Users:', users);
+            console.log('Challenges:', challenges);
+            console.log('Weight Records:', weightRecords);
+            
             let content = `
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -607,6 +612,7 @@
                 <div style="margin-top: 20px;">
                     <button class="btn" onclick="addNewParticipant()">Добавить участника</button>
                     <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
+                    <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 10px;">Очистить все данные (отладка)</button>
                 </div>
             `;
             
@@ -773,19 +779,31 @@
             
             let tableRows = '';
             
-            challenges.forEach(challenge => {
+            challenges.forEach((challenge, index) => {
+                console.log(`Challenge ${index}:`, challenge);
+                
                 const user = users.find(u => u.id === challenge.userId);
+                console.log(`User for challenge ${index}:`, user);
+                
                 const records = weightRecords.filter(r => r.userId === challenge.userId);
+                console.log(`Weight records for challenge ${index}:`, records);
+                
                 const currentWeight = records.length > 0 ? records[records.length - 1].weight : challenge.initialWeight;
                 const progress = ((challenge.initialWeight - currentWeight) / challenge.initialWeight) * 100;
+                
+                console.log(`Calculated values for challenge ${index}:`, {
+                    initialWeight: challenge.initialWeight,
+                    currentWeight: currentWeight,
+                    progress: progress
+                });
                 
                 tableRows += `
                     <tr>
                         <td>${user ? user.username : 'Неизвестно'}</td>
                         <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
-                        <td>${challenge.initialWeight} кг</td>
-                        <td>${currentWeight} кг</td>
-                        <td>${progress.toFixed(1)}%</td>
+                        <td>${challenge.initialWeight || 'Не указан'} кг</td>
+                        <td>${currentWeight || 'Не указан'} кг</td>
+                        <td>${isNaN(progress) ? '0.0' : progress.toFixed(1)}%</td>
                         <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
                         <td>
                             <button class="btn-small btn-edit" onclick="editParticipant('${challenge.id}')">✏️</button>
@@ -965,6 +983,26 @@
             link.click();
             
             URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('Вы уверены, что хотите очистить ВСЕ данные? Это действие нельзя отменить!')) {
+                // Keep only admin user
+                const adminUser = users.find(u => u.isAdmin);
+                users = adminUser ? [adminUser] : [];
+                challenges = [];
+                weightRecords = [];
+                
+                // Save to localStorage
+                saveUsers();
+                saveChallenges();
+                saveWeightRecords();
+                
+                // Refresh admin dashboard
+                showAdminDashboard();
+                
+                alert('Все данные очищены!');
+            }
         }
 
         function addWeightRecord() {
