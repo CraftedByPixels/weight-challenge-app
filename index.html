@@ -547,7 +547,7 @@
                 <div class="checkbox-container">
                     <input type="checkbox" id="rememberMe">
                     <label for="rememberMe">Запомнить меня</label>
-                </div>
+                    </div>
                 <button type="submit" class="btn">Войти</button>
                 <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #666;">
                     Нет аккаунта? <a href="#" onclick="showRegistration()" style="color: #667eea; text-decoration: none;">Зарегистрироваться</a>
@@ -1491,9 +1491,8 @@
             // Get available challenges for registration
             const now = new Date();
             const availableChallenges = challengeConfigs.filter(config => {
-                const regStart = new Date(config.registrationStart);
                 const regEnd = new Date(config.registrationEnd);
-                return now >= regStart && now <= regEnd;
+                return now <= regEnd; // Челлендж доступен, если регистрация еще не закончилась
             });
             
             if (availableChallenges.length === 0) {
@@ -2487,9 +2486,8 @@
             // Get available challenges for registration
             const now = new Date();
             const availableChallenges = challengeConfigs.filter(config => {
-                const regStart = new Date(config.registrationStart);
                 const regEnd = new Date(config.registrationEnd);
-                return now >= regStart && now <= regEnd;
+                return now <= regEnd; // Челлендж доступен, если регистрация еще не закончилась
             });
             
             if (availableChallenges.length === 0) {
@@ -2811,9 +2809,8 @@
             // Get available challenges for registration
             const now = new Date();
             const availableChallenges = challengeConfigs.filter(config => {
-                const regStart = new Date(config.registrationStart);
                 const regEnd = new Date(config.registrationEnd);
-                return now >= regStart && now <= regEnd;
+                return now <= regEnd; // Челлендж доступен, если регистрация еще не закончилась
             });
             
             if (availableChallenges.length === 0) {
