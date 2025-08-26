@@ -1007,6 +1007,32 @@
                             </div>
                         </div>
                         
+                        <div class="current-challenge-info" style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin: 30px 0; text-align: center;">
+                            <h3 style="color: #667eea; font-size: 24px; margin-bottom: 20px;">🎯 Текущий челлендж</h3>
+                            ${challengeConfigs.length > 0 ? `
+                                <div class="challenge-details" style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                    <h4 style="color: #495057; margin-bottom: 15px; font-size: 20px;">${challengeConfigs[0].name || 'Корпоративный челлендж'}</h4>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; text-align: left;">
+                                        <div>
+                                            <p style="margin: 5px 0; color: #6c757d;"><strong>📅 Регистрация:</strong></p>
+                                            <p style="margin: 5px 0; color: #495057;">с ${new Date(challengeConfigs[0].registrationStart).toLocaleDateString('ru-RU')}</p>
+                                            <p style="margin: 5px 0; color: #495057;">до ${new Date(challengeConfigs[0].registrationEnd).toLocaleDateString('ru-RU')}</p>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 5px 0; color: #6c757d;"><strong>⏱️ Длительность:</strong></p>
+                                            <p style="margin: 5px 0; color: #495057;">${challengeConfigs[0].duration || 14} дней</p>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 5px 0; color: #6c757d;"><strong>💰 Взнос:</strong></p>
+                                            <p style="margin: 5px 0; color: #495057;">1000 рублей</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : `
+                                <p style="color: #666; font-size: 16px;">В данный момент нет активных челленджей для регистрации</p>
+                            `}
+                        </div>
+                        
                         <div class="action-buttons" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
                             <button class="btn btn-primary" onclick="showChallengeRequestForm()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; font-size: 16px; font-weight: 600;">
                                 🚀 Подать заявку на участие
@@ -2561,23 +2587,7 @@
                         </ul>
                     </div>
                     
-                    <div class="rules-section" style="margin-bottom: 25px;">
-                        <h4 style="color: #495057; margin-bottom: 15px;">⚠️ Важные условия</h4>
-                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
-                            <li>Запрещено использование препаратов для снижения веса</li>
-                            <li>Рекомендуется консультация с врачом перед участием</li>
-                            <li>Администрация оставляет за собой право дисквалификации</li>
-                            <li>Все спорные вопросы решаются администрацией</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="rules-section" style="margin-bottom: 25px;">
-                        <h4 style="color: #495057; margin-bottom: 15px;">🎁 Призы и награды</h4>
-                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
-                            <li><strong>Победитель:</strong> получает весь призовой фонд + грамота</li>
-                            <li>Все участники получают сертификат участия</li>
-                        </ul>
-                    </div>
+
                     
                     <div style="text-align: center; margin-top: 30px;">
                         <button class="btn btn-primary" onclick="closeModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 25px;">
