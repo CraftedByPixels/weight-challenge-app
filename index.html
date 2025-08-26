@@ -576,11 +576,17 @@
 
         function showAdminDashboard() {
             // Debug information
+            console.log('=== ADMIN DASHBOARD DEBUG ===');
             console.log('Users:', users);
             console.log('Challenges:', challenges);
             console.log('Weight Records:', weightRecords);
+            console.log('Users count (non-admin):', users.filter(u => !u.isAdmin).length);
+            console.log('Challenges count:', challenges.length);
+            console.log('Weight records count:', weightRecords.length);
             
             let content = `
+                <h2>Админ панель</h2>
+                
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3>Всего пользователей</h3>
@@ -606,7 +612,7 @@
                 </div>
                 
                 <div class="table-container" style="margin-top: 20px;">
-                    <h3>Участники челленджа</h3>
+                    <h3>Участники челленджа (${challenges.length} челленджей)</h3>
                     <table>
                         <thead>
                             <tr>
@@ -630,7 +636,10 @@
                 <div style="margin-top: 20px;">
                     <button class="btn" onclick="addNewParticipant()">Добавить участника</button>
                     <button class="btn btn-secondary" onclick="exportData()">Экспорт данных</button>
+                    <button class="btn btn-secondary" onclick="refreshAdminData()" style="margin-top: 10px;">🔄 Обновить данные</button>
+                    <button class="btn btn-secondary" onclick="createTestData()" style="margin-top: 10px;">🧪 Создать тестовые данные</button>
                     <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 10px;">Очистить все данные (отладка)</button>
+                    <button class="btn btn-danger" onclick="cleanCorruptedData()" style="margin-top: 10px;">Очистить некорректные данные</button>
                 </div>
             `;
             
@@ -796,12 +805,29 @@
             }
             
             let tableRows = '';
+            let validChallenges = 0;
             
             challenges.forEach((challenge, index) => {
                 console.log(`Challenge ${index}:`, challenge);
                 
+                // Skip invalid challenges
+                if (!challenge.initialWeight || 
+                    challenge.initialWeight === 'undefined' || 
+                    challenge.initialWeight === 'Не указан' ||
+                    !challenge.startDate ||
+                    !challenge.userId) {
+                    console.log(`Skipping invalid challenge ${index}:`, challenge);
+                    return;
+                }
+                
                 const user = users.find(u => u.id === challenge.userId);
                 console.log(`User for challenge ${index}:`, user);
+                
+                // Skip if user not found
+                if (!user) {
+                    console.log(`User not found for challenge ${index}:`, challenge);
+                    return;
+                }
                 
                 const records = weightRecords.filter(r => r.userId === challenge.userId);
                 console.log(`Weight records for challenge ${index}:`, records);
@@ -815,14 +841,15 @@
                     progress: progress
                 });
                 
+                validChallenges++;
                 tableRows += `
                     <tr>
                         <td>${challenge.id}</td>
-                        <td>${user ? user.username : 'Неизвестно'}</td>
-                        <td>${user ? user.email : 'Не указан'}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
                         <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
-                        <td>${challenge.initialWeight || 'Не указан'} кг</td>
-                        <td>${currentWeight || 'Не указан'} кг</td>
+                        <td>${challenge.initialWeight} кг</td>
+                        <td>${currentWeight} кг</td>
                         <td>${isNaN(progress) ? '0.0' : progress.toFixed(1)}%</td>
                         <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
                         <td>
@@ -833,6 +860,10 @@
                     </tr>
                 `;
             });
+            
+            if (validChallenges === 0) {
+                return '<tr><td colspan="9" style="text-align: center;">Нет корректных участников</td></tr>';
+            }
             
             return tableRows;
         }
@@ -1018,25 +1049,45 @@
         }
 
         function deleteParticipant(challengeId) {
+            console.log('Attempting to delete challenge:', challengeId);
+            
             if (confirm('Вы уверены, что хотите удалить этого участника?')) {
                 const challenge = challenges.find(c => c.id === challengeId);
+                console.log('Found challenge to delete:', challenge);
                 
-                // Remove challenge
-                challenges = challenges.filter(c => c.id !== challengeId);
-                saveChallenges();
-                
-                // Remove weight records
-                weightRecords = weightRecords.filter(r => r.userId !== challenge.userId);
-                saveWeightRecords();
-                
-                // Remove user (if not admin)
-                const user = users.find(u => u.id === challenge.userId);
-                if (user && !user.isAdmin) {
-                    users = users.filter(u => u.id !== challenge.userId);
-                    saveUsers();
+                if (!challenge) {
+                    alert('Челлендж не найден!');
+                    return;
                 }
                 
-                showAdminDashboard();
+                try {
+                    // Remove challenge
+                    challenges = challenges.filter(c => c.id !== challengeId);
+                    console.log('Challenges after deletion:', challenges);
+                    saveChallenges();
+                    
+                    // Remove weight records
+                    weightRecords = weightRecords.filter(r => r.userId !== challenge.userId);
+                    console.log('Weight records after deletion:', weightRecords);
+                    saveWeightRecords();
+                    
+                    // Remove user (if not admin)
+                    const user = users.find(u => u.id === challenge.userId);
+                    if (user && !user.isAdmin) {
+                        users = users.filter(u => u.id !== challenge.userId);
+                        console.log('Users after deletion:', users);
+                        saveUsers();
+                    }
+                    
+                    // Show success message
+                    alert('Участник успешно удален!');
+                    
+                    // Refresh admin dashboard
+                    showAdminDashboard();
+                } catch (error) {
+                    console.error('Error deleting participant:', error);
+                    alert('Ошибка при удалении участника: ' + error.message);
+                }
             }
         }
 
@@ -1114,6 +1165,166 @@
                 showAdminDashboard();
                 
                 alert('Все данные очищены!');
+            }
+        }
+
+        function cleanCorruptedData() {
+            if (confirm('Очистить некорректные данные? Это удалит записи с undefined значениями.')) {
+                let cleanedCount = 0;
+                
+                // Clean challenges with undefined values
+                const originalChallengesLength = challenges.length;
+                challenges = challenges.filter(challenge => {
+                    if (!challenge.initialWeight || 
+                        challenge.initialWeight === 'undefined' || 
+                        challenge.initialWeight === 'Не указан' ||
+                        !challenge.startDate ||
+                        !challenge.userId) {
+                        cleanedCount++;
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Clean weight records with undefined values
+                const originalWeightRecordsLength = weightRecords.length;
+                weightRecords = weightRecords.filter(record => {
+                    if (!record.weight || 
+                        record.weight === 'undefined' || 
+                        record.weight === 'Не указан' ||
+                        !record.date ||
+                        !record.userId) {
+                        cleanedCount++;
+                        return false;
+                    }
+                    return true;
+                });
+                
+                // Clean users with undefined values
+                const originalUsersLength = users.length;
+                users = users.filter(user => {
+                    if (!user.username || 
+                        user.username === 'undefined' || 
+                        user.username === 'Не указан' ||
+                        !user.email ||
+                        user.email === 'undefined') {
+                        if (!user.isAdmin) {
+                            cleanedCount++;
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+                
+                // Save cleaned data
+                saveUsers();
+                saveChallenges();
+                saveWeightRecords();
+                
+                // Refresh admin dashboard
+                showAdminDashboard();
+                
+                alert(`Очищено ${cleanedCount} некорректных записей!\n\nБыло:\n- Челленджей: ${originalChallengesLength}\n- Записей веса: ${originalWeightRecordsLength}\n- Пользователей: ${originalUsersLength}\n\nСтало:\n- Челленджей: ${challenges.length}\n- Записей веса: ${weightRecords.length}\n- Пользователей: ${users.length}`);
+            }
+        }
+
+        function refreshAdminData() {
+            console.log('=== REFRESHING ADMIN DATA ===');
+            
+            // Reload data from localStorage
+            users = JSON.parse(localStorage.getItem('users')) || [];
+            challenges = JSON.parse(localStorage.getItem('challenges')) || [];
+            weightRecords = JSON.parse(localStorage.getItem('weightRecords')) || [];
+            
+            console.log('Reloaded data:');
+            console.log('Users:', users);
+            console.log('Challenges:', challenges);
+            console.log('Weight Records:', weightRecords);
+            
+            // Refresh admin dashboard
+            showAdminDashboard();
+            
+            alert('Данные обновлены!');
+        }
+
+        function createTestData() {
+            if (confirm('Создать тестовые данные? Это добавит несколько участников для проверки.')) {
+                // Create test users
+                const testUsers = [
+                    {
+                        id: 'test1',
+                        username: 'Тестовый участник 1',
+                        email: 'test1@example.com',
+                        isAdmin: false
+                    },
+                    {
+                        id: 'test2',
+                        username: 'Тестовый участник 2',
+                        email: 'test2@example.com',
+                        isAdmin: false
+                    }
+                ];
+                
+                // Create test challenges
+                const testChallenges = [
+                    {
+                        id: 'challenge1',
+                        userId: 'test1',
+                        startDate: '2025-01-01',
+                        initialWeight: 80,
+                        paid: true
+                    },
+                    {
+                        id: 'challenge2',
+                        userId: 'test2',
+                        startDate: '2025-01-15',
+                        initialWeight: 75,
+                        paid: false
+                    }
+                ];
+                
+                // Create test weight records
+                const testWeightRecords = [
+                    {
+                        id: 'weight1',
+                        userId: 'test1',
+                        date: '2025-01-01',
+                        weight: 80
+                    },
+                    {
+                        id: 'weight2',
+                        userId: 'test1',
+                        date: '2025-01-15',
+                        weight: 78
+                    },
+                    {
+                        id: 'weight3',
+                        userId: 'test2',
+                        date: '2025-01-15',
+                        weight: 75
+                    },
+                    {
+                        id: 'weight4',
+                        userId: 'test2',
+                        date: '2025-01-30',
+                        weight: 73
+                    }
+                ];
+                
+                // Add test data
+                users.push(...testUsers);
+                challenges.push(...testChallenges);
+                weightRecords.push(...testWeightRecords);
+                
+                // Save to localStorage
+                saveUsers();
+                saveChallenges();
+                saveWeightRecords();
+                
+                // Refresh admin dashboard
+                showAdminDashboard();
+                
+                alert('Тестовые данные созданы! Теперь у вас должно быть 2 участника и 2 челленджа.');
             }
         }
 
