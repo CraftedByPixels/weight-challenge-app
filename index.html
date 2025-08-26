@@ -969,10 +969,52 @@
             
             if (userChallenges.length === 0) {
                 content = `
-                    <div class="no-challenge" style="text-align: center; padding: 40px;">
-                        <h2>У вас нет активного челленджа</h2>
-                        <p style="color: #666; margin-bottom: 20px;">Подайте заявку на участие в челлендже</p>
-                        <button class="btn btn-primary" onclick="showChallengeRequestForm()">Подать заявку на участие</button>
+                    <div class="challenge-invitation" style="text-align: center; padding: 40px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <div class="invitation-header" style="margin-bottom: 30px;">
+                            <h2 style="color: #667eea; font-size: 32px; margin-bottom: 15px; font-weight: 700;">🎯 Приглашение к участию</h2>
+                            <p style="color: #495057; font-size: 18px; margin-bottom: 25px;">Присоединяйтесь к корпоративному челленджу для здорового образа жизни!</p>
+                        </div>
+                        
+                        <div class="challenge-rules" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 30px; text-align: left;">
+                            <h3 style="color: #667eea; font-size: 24px; margin-bottom: 20px; text-align: center;">📋 Информация о челлендже</h3>
+                            
+                            <div class="rules-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                                <div class="rule-card" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #667eea;">
+                                    <h4 style="margin: 0 0 12px 0; color: #495057; font-size: 18px;">🎯 Цель</h4>
+                                    <p style="margin: 0; color: #6c757d; line-height: 1.5;">Корпоративное снижение веса</p>
+                                </div>
+                                
+                                <div class="rule-card" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
+                                    <h4 style="margin: 0 0 12px 0; color: #495057; font-size: 18px;">⏱️ Длительность</h4>
+                                    <p style="margin: 0; color: #6c757d; line-height: 1.5;">14 дней для каждого участника</p>
+                                </div>
+                                
+                                <div class="rule-card" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                                    <h4 style="margin: 0 0 12px 0; color: #495057; font-size: 18px;">📊 Система</h4>
+                                    <p style="margin: 0; color: #6c757d; line-height: 1.5;">Ежедневные измерения веса (но необязательно)</p>
+                                </div>
+                                
+                                <div class="rule-card" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
+                                    <h4 style="margin: 0 0 12px 0; color: #495057; font-size: 18px;">🏆 Мотивация</h4>
+                                    <p style="margin: 0; color: #6c757d; line-height: 1.5;">Соревнование и достижения</p>
+                                </div>
+                            </div>
+                            
+                            <div class="entry-fee-info" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin-top: 25px; text-align: center;">
+                                <h4 style="margin: 0 0 15px 0; font-size: 20px;">💰 Взнос за участие</h4>
+                                <p style="margin: 0; font-size: 18px; opacity: 0.9;">Взнос составляет <strong>1000 рублей</strong></p>
+                                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.8;">Победитель определяется по проценту снижения веса по окончании 14 дней</p>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="showChallengeRequestForm()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 30px; font-size: 16px; font-weight: 600;">
+                                🚀 Подать заявку на участие
+                            </button>
+                            <button class="btn btn-secondary" onclick="showChallengeRules()" style="background: #f8f9fa; color: #495057; border: 2px solid #dee2e6; padding: 15px 30px; font-size: 16px; font-weight: 600;">
+                                📖 Подробные правила
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
@@ -2457,6 +2499,93 @@
                 </div>
                 <button class="btn" onclick="submitChallengeRequest()">Подать заявку</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function showChallengeRules() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <div class="challenge-rules-modal" style="max-width: 600px;">
+                    <h3 style="color: #667eea; text-align: center; margin-bottom: 25px;">📋 Подробные правила участия</h3>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">🎯 Цель челленджа</h4>
+                        <p style="color: #6c757d; line-height: 1.6; margin-bottom: 15px;">
+                            Корпоративный челлендж направлен на популяризацию здорового образа жизни среди сотрудников 
+                            компании через соревнование по снижению веса.
+                        </p>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">⏱️ Временные рамки</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li>Длительность челленджа: <strong>14 дней</strong></li>
+                            <li>Регистрация участников: за 3 дня до начала</li>
+                            <li>Измерения веса: ежедневно (рекомендуется)</li>
+                            <li>Подведение итогов: на 15-й день</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">📊 Система измерений</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li>Взвешивание проводится в одно и то же время суток</li>
+                            <li>Используются одни и те же весы</li>
+                            <li>Записывается точный вес с одним знаком после запятой</li>
+                            <li>Ежедневные измерения необязательны, но рекомендуются</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">💰 Финансовые условия</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li>Взнос за участие: <strong>1000 рублей</strong></li>
+                            <li>Все взносы формируют призовой фонд</li>
+                            <li>Взнос не возвращается при досрочном выходе</li>
+                            <li>Призовой фонд распределяется между победителями</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">🏆 Определение победителей</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li>Главный критерий: <strong>процент снижения веса</strong></li>
+                            <li>Формула: ((начальный вес - конечный вес) / начальный вес) × 100%</li>
+                            <li>Учитывается только снижение веса (набор веса не засчитывается)</li>
+                            <li>При равных результатах учитывается регулярность измерений</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">⚠️ Важные условия</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li>Запрещено использование препаратов для снижения веса</li>
+                            <li>Рекомендуется консультация с врачом перед участием</li>
+                            <li>Администрация оставляет за собой право дисквалификации</li>
+                            <li>Все спорные вопросы решаются администрацией</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="rules-section" style="margin-bottom: 25px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">🎁 Призы и награды</h4>
+                        <ul style="color: #6c757d; line-height: 1.6; padding-left: 20px;">
+                            <li><strong>1 место:</strong> 70% призового фонда + грамота</li>
+                            <li><strong>2 место:</strong> 20% призового фонда + грамота</li>
+                            <li><strong>3 место:</strong> 10% призового фонда + грамота</li>
+                            <li>Все участники получают сертификат участия</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="closeModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 25px;">
+                            Понятно, закрыть
+                        </button>
+                    </div>
+                </div>
             `;
             
             modal.style.display = 'flex';
