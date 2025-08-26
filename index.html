@@ -637,7 +637,7 @@
                     </div>
                     <div class="stat-card">
                         <h3>Призовой фонд</h3>
-                        <div class="value">${challenges.filter(c => c.paid).length * 1000} ₽</div>
+                        <div class="value">${challenges.reduce((total, c) => total + (c.contribution || 0), 0)} ₽</div>
                     </div>
                     <div class="stat-card">
                         <h3>Общий прогресс</h3>
@@ -662,7 +662,7 @@
                                 <th>Начальный вес</th>
                                 <th>Текущий вес</th>
                                 <th>Прогресс (%)</th>
-                                <th>Статус оплаты</th>
+                                <th>Взнос</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
@@ -892,7 +892,7 @@
                         <td>${challenge.initialWeight} кг</td>
                         <td>${currentWeight} кг</td>
                         <td>${isNaN(progress) ? '0.0' : progress.toFixed(1)}%</td>
-                        <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
+                        <td>${challenge.contribution === 1000 ? '✅ 1000 руб' : '⏳ 0 руб'}</td>
                         <td>
                             <button class="btn-small btn-view" onclick="viewParticipantProfile('${challenge.userId}')" title="Просмотр профиля">👁️</button>
                             <button class="btn-small btn-edit" onclick="editParticipant('${challenge.id}')" title="Редактировать">✏️</button>
@@ -961,8 +961,8 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" id="newPaymentConfirm">
-                        Оплата подтверждена
+                        <input type="checkbox" id="newPaymentConfirm" checked>
+                        Взнос 1000 руб. подтвержден
                     </label>
                 </div>
                 <button class="btn" onclick="confirmAddParticipant()">Добавить участника</button>
@@ -1007,7 +1007,7 @@
                 configId: challengeConfigId,
                 startDate: new Date().toISOString().split('T')[0],
                 initialWeight: initialWeight,
-                paid: paymentConfirm
+                contribution: paymentConfirm ? 1000 : 0
             };
             challenges.push(newChallenge);
             saveChallenges();
@@ -1056,10 +1056,10 @@
                     <input type="number" step="0.1" id="editInitialWeight" value="${challenge.initialWeight}" required>
                 </div>
                 <div class="form-group">
-                    <label>Статус оплаты</label>
+                    <label>Взнос</label>
                     <select id="editPaymentStatus">
-                        <option value="false" ${!challenge.paid ? 'selected' : ''}>Ожидает оплаты</option>
-                        <option value="true" ${challenge.paid ? 'selected' : ''}>Оплачено</option>
+                        <option value="0" ${!challenge.contribution ? 'selected' : ''}>Не внесен (0 руб)</option>
+                        <option value="1000" ${challenge.contribution === 1000 ? 'selected' : ''}>Внесен (1000 руб)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1078,7 +1078,7 @@
             const email = document.getElementById('editEmail').value;
             const startDate = document.getElementById('editStartDate').value;
             const initialWeight = parseFloat(document.getElementById('editInitialWeight').value);
-            const paymentStatus = document.getElementById('editPaymentStatus').value === 'true';
+            const contribution = parseInt(document.getElementById('editPaymentStatus').value);
             const newWeight = parseFloat(document.getElementById('editNewWeight').value);
             
             if (!username || !email || !startDate || !initialWeight) {
@@ -1099,7 +1099,7 @@
             if (challenge) {
                 challenge.startDate = startDate;
                 challenge.initialWeight = initialWeight;
-                challenge.paid = paymentStatus;
+                challenge.contribution = contribution;
                 saveChallenges();
             }
             
@@ -1745,14 +1745,42 @@
         }
 
         function joinChallenge() {
+            if (challengeConfigs.length === 0) {
+                alert('Сейчас нет доступных челленджей для участия!');
+                return;
+            }
+            
             const modal = document.getElementById('modal');
             const modalContent = document.getElementById('modalContent');
+            
+            // Get available challenges for registration
+            const now = new Date();
+            const availableChallenges = challengeConfigs.filter(config => {
+                const regStart = new Date(config.registrationStart);
+                const regEnd = new Date(config.registrationEnd);
+                return now >= regStart && now <= regEnd;
+            });
+            
+            if (availableChallenges.length === 0) {
+                alert('Сейчас нет активных челленджей для регистрации!');
+                return;
+            }
+            
+            let challengeOptions = '';
+            availableChallenges.forEach(config => {
+                const regEnd = new Date(config.registrationEnd);
+                const daysLeft = Math.ceil((regEnd - now) / (1000 * 60 * 60 * 24));
+                challengeOptions += `<option value="${config.id}">${config.name} (регистрация до ${regEnd.toLocaleDateString('ru-RU')}, осталось ${daysLeft} дней)</option>`;
+            });
             
             modalContent.innerHTML = `
                 <h3>Присоединиться к челленджу</h3>
                 <div class="form-group">
-                    <label>Дата начала</label>
-                    <input type="date" id="startDate" min="${new Date().toISOString().split('T')[0]}" required>
+                    <label>Выберите челлендж</label>
+                    <select id="challengeConfigSelect" required>
+                        <option value="">Выберите челлендж...</option>
+                        ${challengeOptions}
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Начальный вес (кг)</label>
@@ -1760,7 +1788,7 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" id="paymentConfirm">
+                        <input type="checkbox" id="paymentConfirm" checked>
                         Я подтверждаю оплату взноса 1000₽
                     </label>
                 </div>
@@ -1772,21 +1800,28 @@
         }
 
         function confirmJoinChallenge() {
-            const startDate = document.getElementById('startDate').value;
+            const challengeConfigId = document.getElementById('challengeConfigSelect').value;
             const initialWeight = parseFloat(document.getElementById('initialWeight').value);
             const paymentConfirm = document.getElementById('paymentConfirm').checked;
             
-            if (!startDate || !initialWeight || !paymentConfirm) {
+            if (!challengeConfigId || !initialWeight || !paymentConfirm) {
                 alert('Пожалуйста, заполните все поля и подтвердите оплату');
+                return;
+            }
+            
+            const challengeConfig = challengeConfigs.find(c => c.id === challengeConfigId);
+            if (!challengeConfig) {
+                alert('Выбранный челлендж не найден!');
                 return;
             }
             
             const newChallenge = {
                 id: Date.now().toString(),
                 userId: currentUser.id,
-                startDate: startDate,
+                configId: challengeConfigId,
+                startDate: new Date().toISOString().split('T')[0],
                 initialWeight: initialWeight,
-                paid: paymentConfirm
+                contribution: paymentConfirm ? 1000 : 0
             };
             
             challenges.push(newChallenge);
@@ -1796,7 +1831,7 @@
             const weightRecord = {
                 id: Date.now().toString() + 'w',
                 userId: currentUser.id,
-                date: startDate,
+                date: new Date().toISOString().split('T')[0],
                 weight: initialWeight
             };
             
@@ -1808,7 +1843,7 @@
             
             // Show success message
             const content = document.getElementById('dashboardContent');
-            content.innerHTML = '<div class="success-message">Вы успешно присоединились к челленджу!</div>' + content.innerHTML;
+            content.innerHTML = '<div class="success-message">Вы успешно присоединились к челленджу "' + challengeConfig.name + '"!</div>' + content.innerHTML;
         }
 
         function closeModal() {
