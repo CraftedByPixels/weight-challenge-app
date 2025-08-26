@@ -73,10 +73,21 @@
             transition: all 0.3s;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
         }
 
         .btn {
@@ -341,6 +352,11 @@
             color: white;
         }
 
+        .btn-view {
+            background: #10b981;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -594,7 +610,9 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Пользователь</th>
+                                <th>Email</th>
                                 <th>Дата начала</th>
                                 <th>Начальный вес</th>
                                 <th>Текущий вес</th>
@@ -774,7 +792,7 @@
 
         function generateParticipantsTable() {
             if (challenges.length === 0) {
-                return '<tr><td colspan="7" style="text-align: center;">Нет активных участников</td></tr>';
+                return '<tr><td colspan="9" style="text-align: center;">Нет активных участников</td></tr>';
             }
             
             let tableRows = '';
@@ -799,15 +817,18 @@
                 
                 tableRows += `
                     <tr>
+                        <td>${challenge.id}</td>
                         <td>${user ? user.username : 'Неизвестно'}</td>
+                        <td>${user ? user.email : 'Не указан'}</td>
                         <td>${new Date(challenge.startDate).toLocaleDateString('ru-RU')}</td>
                         <td>${challenge.initialWeight || 'Не указан'} кг</td>
                         <td>${currentWeight || 'Не указан'} кг</td>
                         <td>${isNaN(progress) ? '0.0' : progress.toFixed(1)}%</td>
                         <td>${challenge.paid ? '✅ Оплачено' : '⏳ Ожидает'}</td>
                         <td>
-                            <button class="btn-small btn-edit" onclick="editParticipant('${challenge.id}')">✏️</button>
-                            <button class="btn-small btn-delete" onclick="deleteParticipant('${challenge.id}')">🗑️</button>
+                            <button class="btn-small btn-view" onclick="viewParticipantProfile('${challenge.userId}')" title="Просмотр профиля">👁️</button>
+                            <button class="btn-small btn-edit" onclick="editParticipant('${challenge.id}')" title="Редактировать">✏️</button>
+                            <button class="btn-small btn-delete" onclick="deleteParticipant('${challenge.id}')" title="Удалить">🗑️</button>
                         </td>
                     </tr>
                 `;
@@ -912,35 +933,88 @@
             modalContent.innerHTML = `
                 <h3>Редактировать участника: ${user.username}</h3>
                 <div class="form-group">
-                    <label>Финальный вес (кг)</label>
-                    <input type="number" step="0.1" id="finalWeight" placeholder="Введите финальный вес">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="editUsername" value="${user.username}" required>
                 </div>
-                <button class="btn" onclick="saveFinalWeight('${challenge.userId}')">Сохранить</button>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" value="${user.email}" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата начала</label>
+                    <input type="date" id="editStartDate" value="${challenge.startDate}" required>
+                </div>
+                <div class="form-group">
+                    <label>Начальный вес (кг)</label>
+                    <input type="number" step="0.1" id="editInitialWeight" value="${challenge.initialWeight}" required>
+                </div>
+                <div class="form-group">
+                    <label>Статус оплаты</label>
+                    <select id="editPaymentStatus">
+                        <option value="false" ${!challenge.paid ? 'selected' : ''}>Ожидает оплаты</option>
+                        <option value="true" ${challenge.paid ? 'selected' : ''}>Оплачено</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Добавить запись веса (кг)</label>
+                    <input type="number" step="0.1" id="editNewWeight" placeholder="Введите новый вес">
+                </div>
+                <button class="btn" onclick="saveParticipantEdit('${challengeId}', '${challenge.userId}')">Сохранить изменения</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
             `;
             
             modal.style.display = 'flex';
         }
 
-        function saveFinalWeight(userId) {
-            const finalWeight = parseFloat(document.getElementById('finalWeight').value);
-            if (!finalWeight) {
-                alert('Пожалуйста, введите корректный вес');
+        function saveParticipantEdit(challengeId, userId) {
+            const username = document.getElementById('editUsername').value;
+            const email = document.getElementById('editEmail').value;
+            const startDate = document.getElementById('editStartDate').value;
+            const initialWeight = parseFloat(document.getElementById('editInitialWeight').value);
+            const paymentStatus = document.getElementById('editPaymentStatus').value === 'true';
+            const newWeight = parseFloat(document.getElementById('editNewWeight').value);
+            
+            if (!username || !email || !startDate || !initialWeight) {
+                alert('Пожалуйста, заполните все обязательные поля');
                 return;
             }
             
-            const weightRecord = {
-                id: Date.now().toString(),
-                userId: userId,
-                date: new Date().toISOString().split('T')[0],
-                weight: finalWeight
-            };
+            // Update user
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                user.username = username;
+                user.email = email;
+                saveUsers();
+            }
             
-            weightRecords.push(weightRecord);
-            saveWeightRecords();
+            // Update challenge
+            const challenge = challenges.find(c => c.id === challengeId);
+            if (challenge) {
+                challenge.startDate = startDate;
+                challenge.initialWeight = initialWeight;
+                challenge.paid = paymentStatus;
+                saveChallenges();
+            }
+            
+            // Add new weight record if provided
+            if (newWeight && !isNaN(newWeight)) {
+                const weightRecord = {
+                    id: Date.now().toString(),
+                    userId: userId,
+                    date: new Date().toISOString().split('T')[0],
+                    weight: newWeight
+                };
+                
+                weightRecords.push(weightRecord);
+                saveWeightRecords();
+            }
             
             closeModal();
             showAdminDashboard();
+            
+            // Show success message
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = '<div class="success-message">Данные участника успешно обновлены!</div>' + content.innerHTML;
         }
 
         function deleteParticipant(challengeId) {
@@ -963,6 +1037,44 @@
                 }
                 
                 showAdminDashboard();
+            }
+        }
+
+        function viewParticipantProfile(userId) {
+            const user = users.find(u => u.id === userId);
+            const challenge = challenges.find(c => c.userId === userId);
+            const records = weightRecords.filter(r => r.userId === userId);
+            
+            if (!user || !challenge) {
+                alert('Участник не найден');
+                return;
+            }
+            
+            // Switch to participant view mode
+            currentUser = user;
+            showUserDashboard();
+            
+            // Change title to show we're viewing participant profile
+            document.getElementById('dashboardTitle').textContent = `Профиль участника: ${user.username}`;
+            document.getElementById('dashboardSubtitle').textContent = 'Просмотр от имени администратора';
+            
+            // Add return to admin panel button
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = `
+                <div class="success-message">Просматриваете профиль участника: ${user.username}</div>
+                ${content.innerHTML}
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="returnToAdminPanel()">Вернуться в админ панель</button>
+                </div>
+            `;
+        }
+
+        function returnToAdminPanel() {
+            // Restore admin user
+            const adminUser = users.find(u => u.isAdmin);
+            if (adminUser) {
+                currentUser = adminUser;
+                showDashboard(); // This will show admin dashboard
             }
         }
 
